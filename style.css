@@ -35,7 +35,7 @@ body {
 }
 
 /* =========================================
-   MAIN LAYOUT
+   MAIN
    ========================================= */
 
 main {
@@ -118,8 +118,7 @@ main {
 
     transition:
         background 0.7s ease,
-        box-shadow 0.7s ease,
-        transform 0.3s ease;
+        box-shadow 0.7s ease;
 }
 
 .avatar img {
@@ -189,12 +188,9 @@ main {
         box-shadow 0.28s ease;
 }
 
-/*
-    КРУГЛАЯ ПОДСВЕТКА.
-
-    Центр находится ровно под курсором.
-    Градиент не растянут по ширине карточки.
-*/
+/* =========================================
+   CARD CURSOR GLOW
+   ========================================= */
 
 .card::before {
     content: "";
@@ -205,6 +201,7 @@ main {
     background:
         radial-gradient(
             circle 105px at var(--mx) var(--my),
+
             color-mix(
                 in srgb,
                 var(--link-color) 34%,
@@ -228,9 +225,9 @@ main {
     pointer-events: none;
 }
 
-/*
-    Очень лёгкое внутреннее свечение.
-*/
+/* =========================================
+   CARD INNER GLOW
+   ========================================= */
 
 .card::after {
     content: "";
@@ -285,6 +282,10 @@ main {
         );
 }
 
+/* =========================================
+   CARD CONTENT
+   ========================================= */
+
 .card > * {
     position: relative;
     z-index: 1;
@@ -314,7 +315,7 @@ main {
 }
 
 /* =========================================
-   BRIGHTER WHITE BACKGROUND CURSOR GLOW
+   BACKGROUND CURSOR GLOW
    ========================================= */
 
 body::after {
@@ -375,7 +376,6 @@ body.cursor-active::after {
 
     .profile {
         min-height: 0;
-
         padding: 26px;
     }
 
@@ -388,29 +388,52 @@ body.cursor-active::after {
         min-height: 70px;
     }
 
+    /*
+        МОБИЛЬНАЯ ПОДСВЕТКА.
+
+        Она всегда использует цвет самой карточки.
+        Поэтому Discord (#5865f2) тоже гарантированно
+        получает свою подсветку.
+    */
+
     .card.mobile-active {
         transform:
             translateY(-4px)
             scale(1.012);
 
         border-color:
-            color-mix(
-                in srgb,
-                var(--link-color) 70%,
-                white 10%
-            );
+            var(--link-color);
 
         box-shadow:
             0 18px 55px
             color-mix(
                 in srgb,
-                var(--link-color) 20%,
+                var(--link-color) 24%,
                 transparent
             );
     }
 
     .card.mobile-active::before {
         opacity: 1;
+
+        background:
+            radial-gradient(
+                circle 115px at 50% 50%,
+
+                color-mix(
+                    in srgb,
+                    var(--link-color) 38%,
+                    transparent
+                ) 0%,
+
+                color-mix(
+                    in srgb,
+                    var(--link-color) 18%,
+                    transparent
+                ) 30%,
+
+                transparent 72%
+            );
     }
 
     .card.mobile-active::after {
@@ -418,7 +441,7 @@ body.cursor-active::after {
             inset 0 0 35px
             color-mix(
                 in srgb,
-                var(--link-color) 14%,
+                var(--link-color) 15%,
                 transparent
             );
     }
