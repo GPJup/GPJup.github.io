@@ -1,9 +1,11 @@
-```javascript
 const canvas = document.getElementById("particles");
 const ctx = canvas.getContext("2d");
 
-let w;
-let h;
+const cards = [...document.querySelectorAll(".card")];
+const avatar = document.querySelector(".avatar");
+
+let width;
+let height;
 let dpr;
 
 let particles = [];
@@ -15,76 +17,83 @@ const mouse = {
     color: "#8b5cf6"
 };
 
-const cards = [...document.querySelectorAll(".card")];
-const avatar = document.querySelector(".avatar");
-
 /*
- * Цвета плашек берём непосредственно
- * из data-color в HTML.
- */
-const cardColors = cards.map(card => card.dataset.color);
+    Берём цвета непосредственно
+    из карточек HTML.
+*/
+const cardColors = cards.map(
+    card => card.dataset.color
+);
 
-/*
- * Запасные цвета для частиц.
- */
 const palette = [
     "#8b5cf6",
     "#a78bfa",
     "#6366f1"
 ];
 
-/*
- * Анимация аватарки.
- */
-let avatarColorIndex = 0;
-let avatarTimer = null;
+
+/* =========================================
+   AVATAR COLOR
+   ========================================= */
 
 function setAvatarColor(color) {
     if (!avatar) return;
 
-    avatar.style.setProperty("--avatar-color", color);
+    avatar.style.setProperty(
+        "--avatar-color",
+        color
+    );
 
-    /*
-     * Меняем общий accent только тогда,
-     * когда пользователь не взаимодействует
-     * с конкретной плашкой.
-     */
-    if (!mouse.active) {
-        document.documentElement.style.setProperty(
-            "--accent",
-            color
-        );
-    }
+    document.documentElement.style.setProperty(
+        "--accent",
+        color
+    );
 }
 
+
+/*
+    Циклическая смена цвета аватарки.
+*/
+let avatarIndex = 0;
+let avatarInterval = null;
+
 function startAvatarCycle() {
-    if (avatarTimer || cardColors.length === 0) {
-        return;
-    }
 
-    setAvatarColor(cardColors[avatarColorIndex]);
+    if (avatarInterval) return;
 
-    avatarTimer = setInterval(() => {
+    if (!cardColors.length) return;
+
+    setAvatarColor(
+        cardColors[avatarIndex]
+    );
+
+    avatarInterval = setInterval(() => {
+
         /*
-         * Если курсор находится над плашкой,
-         * аватарка не переключает цвет.
-         */
-        if (mouse.active) {
-            return;
-        }
+            Если пользователь сейчас
+            навёлся на кнопку, цикл
+            временно не меняет цвет.
+        */
+        if (mouse.active) return;
 
-        avatarColorIndex =
-            (avatarColorIndex + 1) % cardColors.length;
+        avatarIndex =
+            (avatarIndex + 1) %
+            cardColors.length;
 
-        setAvatarColor(cardColors[avatarColorIndex]);
-    }, 1400);
+        setAvatarColor(
+            cardColors[avatarIndex]
+        );
+
+    }, 1300);
 }
 
 function stopAvatarCycle() {
-    if (avatarTimer) {
-        clearInterval(avatarTimer);
-        avatarTimer = null;
-    }
+
+    if (!avatarInterval) return;
+
+    clearInterval(avatarInterval);
+
+    avatarInterval = null;
 }
 
 
@@ -93,18 +102,29 @@ function stopAvatarCycle() {
    ========================================= */
 
 function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    w = window.innerWidth;
-    h = window.innerHeight;
+    dpr = Math.min(
+        window.devicePixelRatio || 1,
+        2
+    );
 
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
+    width = window.innerWidth;
+    height = window.innerHeight;
 
-    canvas.style.width = `${w}px`;
-    canvas.style.height = `${h}px`;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
 
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
 
     particles = Array.from(
         {
@@ -112,25 +132,47 @@ function resize() {
                 240,
                 Math.max(
                     90,
-                    Math.floor((w * h) / 7000)
+                    Math.floor(
+                        width * height / 7000
+                    )
                 )
             )
         },
         () => ({
-            x: Math.random() * w,
-            y: Math.random() * h,
-            vx: (Math.random() - 0.5) * 0.2,
-            vy: (Math.random() - 0.5) * 0.2,
-            r: 0.5 + Math.random() * 1.5,
-            c: palette[
-                Math.floor(Math.random() * palette.length)
-            ],
-            life: Math.random() * 6.28
+            x: Math.random() * width,
+            y: Math.random() * height,
+
+            vx:
+                (Math.random() - 0.5) *
+                0.2,
+
+            vy:
+                (Math.random() - 0.5) *
+                0.2,
+
+            r:
+                0.5 +
+                Math.random() * 1.5,
+
+            c:
+                palette[
+                    Math.floor(
+                        Math.random() *
+                        palette.length
+                    )
+                ],
+
+            life:
+                Math.random() *
+                Math.PI *
+                2
         })
     );
 }
 
+
 function rgb(hex) {
+
     hex = hex.replace("#", "");
 
     if (hex.length === 3) {
@@ -140,269 +182,404 @@ function rgb(hex) {
             .join("");
     }
 
-    const n = parseInt(hex, 16);
+    const number =
+        parseInt(hex, 16);
 
     return [
-        (n >> 16) & 255,
-        (n >> 8) & 255,
-        n & 255
+        (number >> 16) & 255,
+        (number >> 8) & 255,
+        number & 255
     ];
 }
 
-function mix(a, b, t) {
+
+function mix(a, b, amount) {
+
     const A = rgb(a);
     const B = rgb(b);
 
-    return `rgb(${A
-        .map(
-            (v, i) =>
-                Math.round(
-                    v + (B[i] - v) * t
-                )
-        )
-        .join(",")})`;
+    return `rgb(${A.map(
+        (value, index) =>
+            Math.round(
+                value +
+                (B[index] - value) *
+                amount
+            )
+    ).join(",")})`;
 }
 
-function frame() {
-    ctx.clearRect(0, 0, w, h);
 
-    for (const p of particles) {
-        p.life += 0.008;
+function drawParticles() {
 
-        p.x +=
-            p.vx +
-            Math.sin(p.life) * 0.025;
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
 
-        p.y +=
-            p.vy +
-            Math.cos(p.life) * 0.025;
+    for (const particle of particles) {
 
-        if (p.x < -20) p.x = w + 20;
-        if (p.x > w + 20) p.x = -20;
+        particle.life += 0.008;
 
-        if (p.y < -20) p.y = h + 20;
-        if (p.y > h + 20) p.y = -20;
+        particle.x +=
+            particle.vx +
+            Math.sin(
+                particle.life
+            ) * 0.025;
 
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
+        particle.y +=
+            particle.vy +
+            Math.cos(
+                particle.life
+            ) * 0.025;
 
-        const dist = Math.hypot(dx, dy);
+        if (particle.x < -20)
+            particle.x = width + 20;
+
+        if (particle.x > width + 20)
+            particle.x = -20;
+
+        if (particle.y < -20)
+            particle.y = height + 20;
+
+        if (particle.y > height + 20)
+            particle.y = -20;
+
+
+        const dx =
+            particle.x - mouse.x;
+
+        const dy =
+            particle.y - mouse.y;
+
+        const distance =
+            Math.hypot(dx, dy);
 
         let alpha = 0.2;
-        let color = p.c;
+        let color = particle.c;
 
+
+        /*
+            Цвет частиц меняется
+            в зависимости от кнопки
+            под курсором.
+        */
         if (
             mouse.active &&
-            dist < 155
+            distance < 155
         ) {
-            const t = 1 - dist / 155;
+
+            const amount =
+                1 - distance / 155;
 
             color = mix(
-                p.c,
+                particle.c,
                 mouse.color,
-                t
+                amount
             );
 
-            alpha = 0.2 + 0.7 * t;
+            alpha =
+                0.2 +
+                0.7 * amount;
 
-            if (dist > 0) {
-                p.x +=
-                    (dx / dist) *
-                    t *
+            if (distance > 0) {
+
+                particle.x +=
+                    (dx / distance) *
+                    amount *
                     0.12;
 
-                p.y +=
-                    (dy / dist) *
-                    t *
+                particle.y +=
+                    (dy / distance) *
+                    amount *
                     0.12;
             }
         }
+
 
         ctx.globalAlpha = alpha;
         ctx.fillStyle = color;
 
         ctx.beginPath();
+
         ctx.arc(
-            p.x,
-            p.y,
-            p.r,
+            particle.x,
+            particle.y,
+            particle.r,
             0,
             Math.PI * 2
         );
+
         ctx.fill();
     }
 
     ctx.globalAlpha = 1;
 
-    requestAnimationFrame(frame);
+    requestAnimationFrame(
+        drawParticles
+    );
 }
 
 
 /* =========================================
-   МЫШЬ / DESKTOP
+   DESKTOP HOVER
    ========================================= */
 
-window.addEventListener("pointermove", event => {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
-    mouse.active = true;
-});
-
-window.addEventListener("pointerleave", () => {
-    mouse.active = false;
-
-    /*
-     * Возвращаемся к циклической анимации
-     * аватарки после ухода курсора.
-     */
-    startAvatarCycle();
-});
-
-
 cards.forEach(card => {
-    const color = card.dataset.color;
+
+    const color =
+        card.dataset.color;
 
     card.style.setProperty(
         "--link-color",
         color
     );
 
-    card.addEventListener("pointerenter", () => {
-        /*
-         * Навели на плашку:
-         * аватарка принимает её цвет.
-         */
-        mouse.color = color;
 
-        if (!window.matchMedia("(max-width: 760px)").matches) {
+    card.addEventListener(
+        "pointerenter",
+        event => {
+
+            /*
+                На мобильных pointerenter
+                не используем как hover.
+            */
+            if (
+                window.matchMedia(
+                    "(hover: none)"
+                ).matches
+            ) {
+                return;
+            }
+
             mouse.active = true;
+            mouse.color = color;
 
             stopAvatarCycle();
 
             setAvatarColor(color);
-
-            document.documentElement.style.setProperty(
-                "--accent",
-                color
-            );
         }
-    });
+    );
 
-    card.addEventListener("pointermove", event => {
-        const rect =
-            card.getBoundingClientRect();
 
-        card.style.setProperty(
-            "--mx",
-            `${event.clientX - rect.left}px`
-        );
-    });
+    card.addEventListener(
+        "pointermove",
+        event => {
 
-    card.addEventListener("pointerleave", () => {
-        /*
-         * После ухода с карточки снова
-         * запускаем переливание аватарки.
-         */
-        if (!window.matchMedia("(max-width: 760px)").matches) {
+            if (
+                window.matchMedia(
+                    "(hover: none)"
+                ).matches
+            ) {
+                return;
+            }
+
+            const rect =
+                card.getBoundingClientRect();
+
+            card.style.setProperty(
+                "--mx",
+                `${event.clientX - rect.left}px`
+            );
+
+            mouse.x =
+                event.clientX;
+
+            mouse.y =
+                event.clientY;
+
+            mouse.color =
+                color;
+        }
+    );
+
+
+    card.addEventListener(
+        "pointerleave",
+        () => {
+
+            if (
+                window.matchMedia(
+                    "(hover: none)"
+                ).matches
+            ) {
+                return;
+            }
+
             mouse.active = false;
+
             startAvatarCycle();
         }
-    });
+    );
 });
 
 
+/*
+    Когда курсор просто двигается
+    по странице, частицы реагируют.
+*/
+window.addEventListener(
+    "pointermove",
+    event => {
+
+        if (
+            window.matchMedia(
+                "(hover: none)"
+            ).matches
+        ) {
+            return;
+        }
+
+        mouse.x =
+            event.clientX;
+
+        mouse.y =
+            event.clientY;
+    }
+);
+
+
+window.addEventListener(
+    "pointerleave",
+    () => {
+        mouse.active = false;
+        startAvatarCycle();
+    }
+);
+
+
 /* =========================================
-   МОБИЛЬНЫЙ РЕЖИМ
+   MOBILE AUTO HIGHLIGHT
    ========================================= */
 
 let mobileInterval = null;
 let mobileIndex = 0;
 
-function startMobileAnimation() {
-    if (mobileInterval || cards.length === 0) {
-        return;
-    }
+function activateMobileCard() {
+
+    cards.forEach(card => {
+        card.classList.remove(
+            "mobile-active"
+        );
+    });
+
+    const card =
+        cards[mobileIndex];
+
+    const color =
+        card.dataset.color;
+
+
+    card.classList.add(
+        "mobile-active"
+    );
+
 
     /*
-     * На телефоне частицы не должны считать
-     * обычный pointer как hover.
-     */
-    mouse.active = false;
+        Аватарка принимает цвет
+        текущей кнопки.
+    */
+    setAvatarColor(color);
 
-    function activateNextCard() {
-        cards.forEach(card => {
-            card.classList.remove("mobile-active");
-        });
 
-        const card = cards[mobileIndex];
-        const color = card.dataset.color;
-
-        card.classList.add("mobile-active");
-
-        /*
-         * Аватарка получает цвет текущей плашки.
-         * Получается ощущение, что подсветка
-         * начинается от логотипа и движется вниз.
-         */
-        setAvatarColor(color);
-
-        document.documentElement.style.setProperty(
-            "--accent",
-            color
-        );
-
-        mobileIndex =
-            (mobileIndex + 1) % cards.length;
-    }
-
-    activateNextCard();
-
-    mobileInterval = setInterval(
-        activateNextCard,
-        1700
+    /*
+        Передаём цвет подсветке.
+    */
+    card.style.setProperty(
+        "--link-color",
+        color
     );
+
+
+    mobileIndex =
+        (mobileIndex + 1) %
+        cards.length;
 }
 
+
+function startMobileAnimation() {
+
+    if (mobileInterval) return;
+
+    if (!cards.length) return;
+
+    stopAvatarCycle();
+
+    mobileIndex = 0;
+
+    activateMobileCard();
+
+    mobileInterval =
+        setInterval(
+            activateMobileCard,
+            1600
+        );
+}
+
+
 function stopMobileAnimation() {
+
     if (mobileInterval) {
-        clearInterval(mobileInterval);
+
+        clearInterval(
+            mobileInterval
+        );
+
         mobileInterval = null;
     }
 
     cards.forEach(card => {
-        card.classList.remove("mobile-active");
+        card.classList.remove(
+            "mobile-active"
+        );
     });
 }
 
 
 /* =========================================
-   ИНИЦИАЛИЗАЦИЯ
+   DEVICE MODE
    ========================================= */
 
 function updateDeviceMode() {
-    const isMobile =
+
+    const mobile =
         window.matchMedia(
             "(max-width: 760px)"
         ).matches;
 
     stopMobileAnimation();
 
-    if (isMobile) {
-        stopAvatarCycle();
+    if (mobile) {
+
+        mouse.active = false;
+
         startMobileAnimation();
+
     } else {
+
         startAvatarCycle();
     }
 }
 
-resize();
 
-window.addEventListener("resize", () => {
-    resize();
-    updateDeviceMode();
-});
+/* =========================================
+   START
+   ========================================= */
+
+resize();
 
 updateDeviceMode();
 
-frame();
-```
+drawParticles();
+
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        resize();
+
+        updateDeviceMode();
+    }
+);
