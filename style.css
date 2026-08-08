@@ -32,10 +32,6 @@ body {
     overflow-x: hidden;
 }
 
-/* =========================================
-   PARTICLES
-   ========================================= */
-
 #particles {
     position: fixed;
     inset: 0;
@@ -44,12 +40,11 @@ body {
     height: 100%;
 
     pointer-events: none;
-
     z-index: 0;
 }
 
 /* =========================================
-   FLYING IMAGE
+   POO
    ========================================= */
 
 #flying-poo {
@@ -66,12 +61,15 @@ body {
     pointer-events: none;
     user-select: none;
 
-    z-index: 5;
+    z-index: 20;
+
+    display: block;
 
     will-change:
         transform,
         left,
-        top;
+        top,
+        opacity;
 
     transform-origin: center center;
 
@@ -80,6 +78,42 @@ body {
             0 8px 18px
             rgba(0, 0, 0, 0.35)
         );
+}
+
+/* =========================================
+   OGS CULE
+   ========================================= */
+
+#ogscule {
+    position: fixed;
+
+    left: 0;
+    top: 0;
+
+    width: 180px;
+    height: 180px;
+
+    object-fit: contain;
+
+    pointer-events: none;
+    user-select: none;
+
+    z-index: 30;
+
+    opacity: 0;
+
+    transform:
+        translate(0, 0)
+        scale(0.15);
+
+    transform-origin: center center;
+
+    will-change:
+        transform,
+        left,
+        top,
+        opacity,
+        filter;
 }
 
 /* =========================================
@@ -150,8 +184,6 @@ main {
     height: 450px;
 
     padding: 34px 20px;
-
-    min-height: 0;
 
     display: flex;
 
@@ -266,12 +298,10 @@ main {
 
         border-color 0.25s ease,
 
-        box-shadow 0.25s ease;
-}
+        box-shadow 0.25s ease,
 
-/* =========================================
-   CARD GLOW
-   ========================================= */
+        opacity 0.15s ease;
+}
 
 .card::before {
     content: "";
@@ -326,10 +356,6 @@ main {
     transition:
         opacity 0.4s ease;
 }
-
-/* =========================================
-   DESKTOP HOVER
-   ========================================= */
 
 .card:hover {
     transform:
@@ -396,7 +422,82 @@ main {
 }
 
 /* =========================================
-   BACKGROUND CURSOR GLOW
+   BURN
+   ========================================= */
+
+.card.burning {
+    pointer-events: none;
+
+    animation:
+        cardBurn
+        0.9s
+        cubic-bezier(.4, 0, .8, 1)
+        forwards;
+}
+
+.card.burning::before {
+    opacity: 0;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 160, 40, 0.8),
+            rgba(255, 70, 20, 0.35) 35%,
+            transparent 70%
+        );
+}
+
+@keyframes cardBurn {
+
+    0% {
+        opacity: 1;
+
+        transform:
+            scale(1)
+            translateY(0)
+            rotate(0deg);
+
+        filter:
+            brightness(1)
+            blur(0);
+    }
+
+    18% {
+        filter:
+            brightness(1.8)
+            saturate(2);
+    }
+
+    40% {
+        opacity: 0.92;
+
+        transform:
+            scale(1.025)
+            translateY(-3px)
+            rotate(-1deg);
+
+        filter:
+            brightness(2)
+            saturate(2)
+            blur(0.5px);
+    }
+
+    100% {
+        opacity: 0;
+
+        transform:
+            scale(0.82)
+            translateY(25px)
+            rotate(3deg);
+
+        filter:
+            brightness(2.5)
+            blur(8px);
+    }
+}
+
+/* =========================================
+   BACKGROUND GLOW
    ========================================= */
 
 body::after {
@@ -476,8 +577,6 @@ body.cursor-active::after {
         width: 100%;
         height: auto;
 
-        min-height: 0;
-
         padding: 26px;
     }
 
@@ -488,15 +587,7 @@ body.cursor-active::after {
 
     .card {
         min-height: 70px;
-
-        transition:
-            transform 0.55s
-            cubic-bezier(.22, 1, .36, 1);
     }
-
-    /* =====================================
-       MOBILE ACTIVE CARD
-       ===================================== */
 
     .card.mobile-active {
         transform:
@@ -543,16 +634,6 @@ body.cursor-active::after {
             );
     }
 
-    .card.mobile-active::after {
-        box-shadow:
-            inset 0 0 35px
-            color-mix(
-                in srgb,
-                var(--link-color) 15%,
-                transparent
-            );
-    }
-
     .card.mobile-active img {
         transform: scale(1.13);
 
@@ -567,11 +648,12 @@ body.cursor-active::after {
         width: 58px;
         height: 58px;
     }
-}
 
-/* =========================================
-   NO HOVER DEVICES
-   ========================================= */
+    #ogscule {
+        width: 135px;
+        height: 135px;
+    }
+}
 
 @media (hover: none) {
 
@@ -593,10 +675,6 @@ body.cursor-active::after {
 
     .card:hover::before {
         opacity: 0;
-    }
-
-    .card:hover::after {
-        box-shadow: none;
     }
 
     .card:hover img {
