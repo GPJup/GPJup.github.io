@@ -24,7 +24,7 @@ const mouse = {
 
     active: false,
 
-    color: "#8b5cf6"
+    color: "#ffffff"
 };
 
 
@@ -58,11 +58,6 @@ function setAvatarColor(color) {
         "--accent",
         color
     );
-
-    document.documentElement.style.setProperty(
-        "--mouse-color",
-        color
-    );
 }
 
 
@@ -86,12 +81,6 @@ function startAvatarCycle() {
 
     avatarInterval =
         setInterval(() => {
-
-            /*
-                Если курсор находится
-                на кнопке, цвет аватарки
-                не переключаем.
-            */
 
             if (mouse.active)
                 return;
@@ -226,63 +215,6 @@ function resize() {
 
 
 /* =========================================
-   COLOR HELPERS
-   ========================================= */
-
-function rgb(hex) {
-
-    hex =
-        hex.replace(
-            "#",
-            ""
-        );
-
-
-    if (hex.length === 3) {
-
-        hex =
-            hex
-                .split("")
-                .map(
-                    x => x + x
-                )
-                .join("");
-    }
-
-
-    const number =
-        parseInt(
-            hex,
-            16
-        );
-
-
-    return [
-        (number >> 16) & 255,
-        (number >> 8) & 255,
-        number & 255
-    ];
-}
-
-
-function mix(a, b, amount) {
-
-    const A = rgb(a);
-    const B = rgb(b);
-
-
-    return `rgb(${A.map(
-        (value, index) =>
-            Math.round(
-                value +
-                (B[index] - value) *
-                amount
-            )
-    ).join(",")})`;
-}
-
-
-/* =========================================
    PARTICLES
    ========================================= */
 
@@ -298,12 +230,12 @@ function drawParticles() {
 
     for (const particle of particles) {
 
-        /*
-            Обычное плавное движение.
-        */
-
         particle.life += 0.008;
 
+
+        /*
+            Обычное движение частиц.
+        */
 
         particle.x +=
             particle.vx +
@@ -320,7 +252,7 @@ function drawParticles() {
 
 
         /*
-            Зацикливание по краям.
+            Перемещение через границы.
         */
 
         if (particle.x < -20)
@@ -339,7 +271,7 @@ function drawParticles() {
 
 
         /*
-            Расстояние до курсора.
+            Расстояние от курсора.
         */
 
         const dx =
@@ -358,54 +290,35 @@ function drawParticles() {
 
 
         let alpha = 0.2;
-        let color = particle.c;
 
 
         /*
-            Зона воздействия курсора.
+            Реакция частиц на курсор.
+            Цвет НЕ меняем.
         */
 
         if (
             mouse.active &&
-            distance < 170
+            distance < 150
         ) {
-
-            /*
-                1 = частица очень близко.
-                0 = частица на границе.
-            */
 
             const force =
                 1 -
-                distance / 170;
+                distance / 150;
 
 
             /*
-                Постепенно окрашиваем
-                частицу в цвет текущей
-                кнопки / аватарки.
-            */
-
-            color =
-                mix(
-                    particle.c,
-                    mouse.color,
-                    force
-                );
-
-
-            /*
-                Делаем ближайшие частицы
-                ярче.
+                Ближайшие частицы
+                становятся немного ярче.
             */
 
             alpha =
                 0.2 +
-                0.7 * force;
+                0.45 * force;
 
 
             /*
-                ОТТАЛКИВАНИЕ
+                Мягкое отталкивание.
             */
 
             if (distance > 0) {
@@ -432,7 +345,7 @@ function drawParticles() {
             alpha;
 
         ctx.fillStyle =
-            color;
+            particle.c;
 
 
         ctx.beginPath();
@@ -468,11 +381,6 @@ window.addEventListener(
     "pointermove",
     event => {
 
-        /*
-            На телефоне курсорная
-            механика не используется.
-        */
-
         if (
             window.matchMedia(
                 "(hover: none)"
@@ -498,8 +406,9 @@ window.addEventListener(
 
 
         /*
-            Передаём координаты курсора
-            CSS-фону.
+            Только координаты.
+            Цвет фона всегда белый
+            и задаётся CSS.
         */
 
         document.documentElement.style.setProperty(
@@ -510,12 +419,6 @@ window.addEventListener(
         document.documentElement.style.setProperty(
             "--mouse-y",
             `${mouse.y}px`
-        );
-
-
-        document.documentElement.style.setProperty(
-            "--mouse-color",
-            mouse.color
         );
     }
 );
@@ -555,7 +458,7 @@ cards.forEach(card => {
 
 
     /*
-        Курсор вошёл в карточку.
+        Вход на карточку.
     */
 
     card.addEventListener(
@@ -571,28 +474,15 @@ cards.forEach(card => {
             }
 
 
-            mouse.color =
-                color;
-
-            mouse.active =
-                true;
-
+            /*
+                Цвет используется только
+                самой карточкой и аватаркой.
+            */
 
             stopAvatarCycle();
 
 
-            /*
-                Аватарка получает
-                цвет карточки.
-            */
-
             setAvatarColor(
-                color
-            );
-
-
-            document.documentElement.style.setProperty(
-                "--mouse-color",
                 color
             );
         }
@@ -620,11 +510,6 @@ cards.forEach(card => {
                 card.getBoundingClientRect();
 
 
-            /*
-                X и Y относительно
-                самой карточки.
-            */
-
             const x =
                 event.clientX -
                 rect.left;
@@ -634,6 +519,11 @@ cards.forEach(card => {
                 event.clientY -
                 rect.top;
 
+
+            /*
+                Круглая подсветка
+                следует за курсором.
+            */
 
             card.style.setProperty(
                 "--mx",
@@ -645,23 +535,12 @@ cards.forEach(card => {
                 "--my",
                 `${y}px`
             );
-
-
-            mouse.x =
-                event.clientX;
-
-            mouse.y =
-                event.clientY;
-
-
-            mouse.color =
-                color;
         }
     );
 
 
     /*
-        Курсор ушёл с карточки.
+        Выход с карточки.
     */
 
     card.addEventListener(
@@ -675,10 +554,6 @@ cards.forEach(card => {
             ) {
                 return;
             }
-
-
-            mouse.active =
-                false;
 
 
             startAvatarCycle();
@@ -717,11 +592,6 @@ function activateMobileCard() {
         "mobile-active"
     );
 
-
-    /*
-        Аватарка принимает цвет
-        текущей карточки.
-    */
 
     setAvatarColor(
         color
