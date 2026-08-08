@@ -2,29 +2,14 @@
    PARTICLES
    ========================================= */
 
-const canvas =
-    document.getElementById("particles");
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
 
-const ctx =
-    canvas.getContext("2d");
-
-const cards =
-    [...document.querySelectorAll(".card")];
-
-const avatar =
-    document.querySelector(".avatar");
-
-
-let width;
-let height;
-let dpr;
+let w = 0;
+let h = 0;
+let dpr = 1;
 
 let particles = [];
-
-
-/* =========================================
-   COLORS
-   ========================================= */
 
 const palette = [
     "#8b5cf6",
@@ -32,57 +17,61 @@ const palette = [
     "#6366f1"
 ];
 
-const cardColors =
-    cards.map(
-        card => card.dataset.color
-    );
-
 
 /* =========================================
    MOUSE
    ========================================= */
 
 const mouse = {
-    x: -999,
-    y: -999,
-
+    x: -9999,
+    y: -9999,
     active: false,
-
     color: "#ffffff"
 };
 
 
 /* =========================================
-   COLOR HELPERS
+   CARDS
    ========================================= */
+
+const cards = [
+    ...document.querySelectorAll(".card")
+];
+
+const avatar =
+    document.querySelector(".avatar");
+
+
+/* =========================================
+   COLOR
+   ========================================= */
+
+let currentColor =
+    "#8b5cf6";
+
+let targetColor =
+    "#8b5cf6";
+
 
 function hexToRgb(hex) {
 
-    hex =
-        hex
-            .replace("#", "")
-            .trim();
-
+    hex = hex.replace("#", "");
 
     if (hex.length === 3) {
-
-        hex =
-            hex
-                .split("")
-                .map(char => char + char)
-                .join("");
+        hex = hex
+            .split("")
+            .map(x => x + x)
+            .join("");
     }
 
-
-    const number =
+    const n =
         parseInt(hex, 16);
 
-
-    return {
-        r: (number >> 16) & 255,
-        g: (number >> 8) & 255,
-        b: number & 255
-    };
+    return [
+        (n >> 16) & 255,
+        (n >> 8) & 255,
+        n & 255
+    ];
 }
 
 
@@ -91,9 +80,8 @@ function rgbToHex(r, g, b) {
     return (
         "#" +
         [r, g, b]
-            .map(value =>
-                Math
-                    .round(value)
+            .map(v =>
+                Math.round(v)
                     .toString(16)
                     .padStart(2, "0")
             )
@@ -102,140 +90,25 @@ function rgbToHex(r, g, b) {
 }
 
 
-function interpolateColor(
-    colorA,
-    colorB,
-    amount
-) {
+function mixColor(a, b, t) {
 
-    const a =
-        hexToRgb(colorA);
-
-    const b =
-        hexToRgb(colorB);
-
+    const A = hexToRgb(a);
+    const B = hexToRgb(b);
 
     return rgbToHex(
-        a.r + (b.r - a.r) * amount,
-        a.g + (b.g - a.g) * amount,
-        a.b + (b.b - a.b) * amount
+        A[0] + (B[0] - A[0]) * t,
+        A[1] + (B[1] - A[1]) * t,
+        A[2] + (B[2] - A[2]) * t
     );
 }
 
 
-/* =========================================
-   SMOOTH COLOR ENGINE
-   ========================================= */
-
-let currentColor =
-    cardColors[0] ||
-    "#8b5cf6";
-
-let targetColor =
-    currentColor;
-
-let colorAnimation = null;
-
-
-function setTargetColor(color) {
-
-    targetColor =
-        color;
-
-
-    if (colorAnimation)
-        return;
-
-
-    colorAnimation =
-        requestAnimationFrame(
-            animateColor
-        );
-}
-
-
-function animateColor() {
-
-    const current =
-        hexToRgb(currentColor);
-
-    const target =
-        hexToRgb(targetColor);
-
-
-    const distance =
-        Math.max(
-            Math.abs(
-                current.r -
-                target.r
-            ),
-
-            Math.abs(
-                current.g -
-                target.g
-            ),
-
-            Math.abs(
-                current.b -
-                target.b
-            )
-        );
-
-
-    const speed =
-        1 -
-        Math.pow(
-            0.001,
-            1 / 55
-        );
-
-
-    currentColor =
-        interpolateColor(
-            currentColor,
-            targetColor,
-            speed
-        );
-
-
-    applyColor(
-        currentColor
-    );
-
-
-    if (distance < 1) {
-
-        currentColor =
-            targetColor;
-
-        applyColor(
-            currentColor
-        );
-
-        colorAnimation = null;
-
-        return;
-    }
-
-
-    colorAnimation =
-        requestAnimationFrame(
-            animateColor
-        );
-}
-
-
-/* =========================================
-   APPLY COLOR
-   ========================================= */
-
-function applyColor(color) {
+function applyAccent(color) {
 
     document.documentElement.style.setProperty(
         "--accent",
         color
     );
-
 
     if (avatar) {
 
@@ -244,22 +117,29 @@ function applyColor(color) {
             color
         );
     }
+}
 
 
-    cards.forEach(card => {
+function updateColor() {
 
-        if (
-            card.classList.contains(
-                "mobile-active"
-            )
-        ) {
+    currentColor =
+        mixColor(
+            currentColor,
+            targetColor,
+            0.035
+        );
 
-            card.style.setProperty(
-                "--link-color",
-                color
-            );
-        }
-    });
+    applyAccent(currentColor);
+
+    requestAnimationFrame(
+        updateColor
+    );
+}
+
+
+function setColor(color) {
+
+    targetColor = color;
 }
 
 
@@ -267,64 +147,62 @@ function applyColor(color) {
    AVATAR COLOR CYCLE
    ========================================= */
 
-let avatarIndex = 0;
-let avatarInterval = null;
+const cardColors =
+    cards.map(
+        card => card.dataset.color
+    );
+
+let avatarColorIndex = 0;
+
+let avatarColorTimer = null;
 
 
-function startAvatarCycle() {
+function startAvatarColorCycle() {
 
-    if (avatarInterval)
+    if (avatarColorTimer)
         return;
-
 
     if (!cardColors.length)
         return;
 
 
-    setTargetColor(
-        cardColors[avatarIndex]
-    );
-
-
-    avatarInterval =
+    avatarColorTimer =
         setInterval(() => {
 
             if (mouse.active)
                 return;
 
-
-            avatarIndex =
+            avatarColorIndex =
                 (
-                    avatarIndex + 1
+                    avatarColorIndex + 1
                 ) %
                 cardColors.length;
 
-
-            setTargetColor(
-                cardColors[avatarIndex]
+            setColor(
+                cardColors[
+                    avatarColorIndex
+                ]
             );
 
         }, 1800);
 }
 
 
-function stopAvatarCycle() {
+function stopAvatarColorCycle() {
 
-    if (!avatarInterval)
+    if (!avatarColorTimer)
         return;
 
-
     clearInterval(
-        avatarInterval
+        avatarColorTimer
     );
 
-
-    avatarInterval = null;
+    avatarColorTimer = null;
 }
 
 
 /* =========================================
-   CANVAS RESIZE
+   RESIZE
    ========================================= */
 
 function resize() {
@@ -335,26 +213,25 @@ function resize() {
             2
         );
 
-
-    width =
+    w =
         window.innerWidth;
 
-    height =
+    h =
         window.innerHeight;
 
 
     canvas.width =
-        width * dpr;
+        w * dpr;
 
     canvas.height =
-        height * dpr;
+        h * dpr;
 
 
     canvas.style.width =
-        `${width}px`;
+        `${w}px`;
 
     canvas.style.height =
-        `${height}px`;
+        `${h}px`;
 
 
     ctx.setTransform(
@@ -376,23 +253,18 @@ function resize() {
                         Math.max(
                             90,
                             Math.floor(
-                                width *
-                                height /
-                                7000
+                                w * h / 7000
                             )
                         )
                     )
             },
-
             () => ({
 
                 x:
-                    Math.random() *
-                    width,
+                    Math.random() * w,
 
                 y:
-                    Math.random() *
-                    height,
+                    Math.random() * h,
 
                 vx:
                     (
@@ -408,8 +280,7 @@ function resize() {
 
                 r:
                     0.5 +
-                    Math.random() *
-                    1.5,
+                    Math.random() * 1.5,
 
                 c:
                     palette[
@@ -429,68 +300,61 @@ function resize() {
 
 
 /* =========================================
-   PARTICLE ANIMATION
+   PARTICLES ANIMATION
    ========================================= */
 
-function drawParticles() {
+function frame() {
 
     ctx.clearRect(
         0,
         0,
-        width,
-        height
+        w,
+        h
     );
 
 
     for (
-        const particle of particles
+        const p of particles
     ) {
 
-        particle.life += 0.008;
+        p.life += 0.008;
 
 
-        particle.x +=
-            particle.vx +
+        p.x +=
+            p.vx +
             Math.sin(
-                particle.life
+                p.life
             ) * 0.025;
 
 
-        particle.y +=
-            particle.vy +
+        p.y +=
+            p.vy +
             Math.cos(
-                particle.life
+                p.life
             ) * 0.025;
 
 
-        if (particle.x < -20)
-            particle.x =
-                width + 20;
+        if (p.x < -20)
+            p.x = w + 20;
+
+        if (p.x > w + 20)
+            p.x = -20;
+
+        if (p.y < -20)
+            p.y = h + 20;
+
+        if (p.y > h + 20)
+            p.y = -20;
 
 
-        if (particle.x > width + 20)
-            particle.x = -20;
+        let dx =
+            p.x - mouse.x;
+
+        let dy =
+            p.y - mouse.y;
 
 
-        if (particle.y < -20)
-            particle.y =
-                height + 20;
-
-
-        if (particle.y > height + 20)
-            particle.y = -20;
-
-
-        const dx =
-            particle.x -
-            mouse.x;
-
-        const dy =
-            particle.y -
-            mouse.y;
-
-
-        const distance =
+        let dist =
             Math.hypot(
                 dx,
                 dy
@@ -502,20 +366,20 @@ function drawParticles() {
 
         if (
             mouse.active &&
-            distance < 150
+            dist < 155
         ) {
 
-            const force =
+            let force =
                 1 -
-                distance / 150;
+                dist / 155;
 
 
-            alpha =
-                0.2 +
-                0.45 * force;
+            /*
+                Частицы разлетаются
+                от курсора.
+            */
 
-
-            if (distance > 0) {
+            if (dist > 0) {
 
                 const push =
                     force *
@@ -523,15 +387,24 @@ function drawParticles() {
                     1.8;
 
 
-                particle.x +=
-                    (dx / distance) *
+                p.x +=
+                    dx / dist *
                     push;
 
-
-                particle.y +=
-                    (dy / distance) *
+                p.y +=
+                    dy / dist *
                     push;
             }
+
+
+            /*
+                Лёгкая белая
+                подсветка.
+            */
+
+            alpha =
+                0.2 +
+                0.45 * force;
         }
 
 
@@ -539,20 +412,18 @@ function drawParticles() {
             alpha;
 
         ctx.fillStyle =
-            particle.c;
+            p.c;
 
 
         ctx.beginPath();
 
-
         ctx.arc(
-            particle.x,
-            particle.y,
-            particle.r,
+            p.x,
+            p.y,
+            p.r,
             0,
             Math.PI * 2
         );
-
 
         ctx.fill();
     }
@@ -562,13 +433,13 @@ function drawParticles() {
 
 
     requestAnimationFrame(
-        drawParticles
+        frame
     );
 }
 
 
 /* =========================================
-   CURSOR
+   MOUSE MOVEMENT
    ========================================= */
 
 window.addEventListener(
@@ -609,19 +480,17 @@ window.addEventListener(
 
         mouse.active = false;
 
-
         document.body.classList.remove(
             "cursor-active"
         );
 
-
-        startAvatarCycle();
+        startAvatarColorCycle();
     }
 );
 
 
 /* =========================================
-   CARD MOUSE EFFECTS
+   CARD EFFECTS
    ========================================= */
 
 cards.forEach(card => {
@@ -649,12 +518,9 @@ cards.forEach(card => {
             }
 
 
-            stopAvatarCycle();
+            stopAvatarColorCycle();
 
-
-            setTargetColor(
-                color
-            );
+            setColor(color);
         }
     );
 
@@ -703,17 +569,17 @@ cards.forEach(card => {
             }
 
 
-            startAvatarCycle();
+            startAvatarColorCycle();
         }
     );
 });
 
 
 /* =========================================
-   MOBILE CARD ANIMATION
+   MOBILE CARDS
    ========================================= */
 
-let mobileInterval = null;
+let mobileTimer = null;
 let mobileIndex = 0;
 
 
@@ -744,9 +610,7 @@ function activateMobileCard() {
     );
 
 
-    setTargetColor(
-        color
-    );
+    setColor(color);
 
 
     mobileIndex =
@@ -757,26 +621,26 @@ function activateMobileCard() {
 }
 
 
-function startMobileAnimation() {
+function startMobileCards() {
 
-    if (mobileInterval)
+    if (
+        window.innerWidth > 760
+    ) {
+        return;
+    }
+
+
+    if (mobileTimer)
         return;
 
 
-    if (!cards.length)
-        return;
-
-
-    stopAvatarCycle();
-
-
-    mobileIndex = 0;
+    stopAvatarColorCycle();
 
 
     activateMobileCard();
 
 
-    mobileInterval =
+    mobileTimer =
         setInterval(
             activateMobileCard,
             2200
@@ -784,18 +648,17 @@ function startMobileAnimation() {
 }
 
 
-function stopMobileAnimation() {
+function stopMobileCards() {
 
-    if (!mobileInterval)
+    if (!mobileTimer)
         return;
 
 
     clearInterval(
-        mobileInterval
+        mobileTimer
     );
 
-
-    mobileInterval = null;
+    mobileTimer = null;
 
 
     cards.forEach(card => {
@@ -808,23 +671,34 @@ function stopMobileAnimation() {
 
 
 /* =========================================
-   FLYING POO
+   POO ELEMENT
    ========================================= */
 
 const poo =
     document.createElement("img");
 
+
 poo.id =
     "flying-poo";
+
 
 poo.src =
     "assets/poo.png";
 
+
 poo.alt =
     "";
 
+
 poo.draggable =
     false;
+
+
+poo.setAttribute(
+    "aria-hidden",
+    "true"
+);
+
 
 document.body.appendChild(
     poo
@@ -835,107 +709,65 @@ document.body.appendChild(
    POO PHYSICS
    ========================================= */
 
-const pooPhysics = {
+const ball = {
 
-    x: 0,
-    y: 0,
+    x: 200,
+    y: 200,
 
-    width: 72,
-    height: 72,
+    size: 72,
 
-    vx: 2.15,
-    vy: 1.65,
+    vx: 2.4,
+    vy: 1.8,
 
     rotation: 0,
 
     rotationSpeed: 0.7,
 
-    /*
-        1 = нормальный размер.
-        Меньше 1 = сжатие.
-    */
-
     scaleX: 1,
     scaleY: 1,
 
     targetScaleX: 1,
-    targetScaleY: 1,
-
-    /*
-        Не даём картинке
-        сталкиваться с одной
-        и той же стеной каждый кадр.
-    */
-
-    cooldown: 0
+    targetScaleY: 1
 };
 
 
 /* =========================================
-   POO INITIAL POSITION
+   INITIAL POSITION
    ========================================= */
 
-function initializePoo() {
+function resetPooPosition() {
 
-    pooPhysics.width =
+    ball.size =
         window.innerWidth <= 760
             ? 58
             : 72;
 
-    pooPhysics.height =
-        pooPhysics.width;
+
+    ball.x =
+        w * 0.5 -
+        ball.size * 0.5;
 
 
-    pooPhysics.x =
-        window.innerWidth * 0.5 -
-        pooPhysics.width * 0.5;
+    ball.y =
+        h * 0.25;
 
 
-    pooPhysics.y =
-        window.innerHeight * 0.25;
-
-
-    /*
-        Небольшое случайное
-        направление.
-    */
-
-    pooPhysics.vx =
+    ball.vx =
         (
             Math.random() > 0.5
                 ? 1
                 : -1
         ) *
-        (1.8 + Math.random() * 1.2);
+        2.2;
 
 
-    pooPhysics.vy =
+    ball.vy =
         (
             Math.random() > 0.5
                 ? 1
                 : -1
         ) *
-        (1.5 + Math.random() * 1.2);
-}
-
-
-/* =========================================
-   GET COLLISION RECTANGLES
-   ========================================= */
-
-function getCollisionRects() {
-
-    const elements = [
-        document.querySelector(".profile"),
-        ...cards
-    ];
-
-
-    return elements
-        .filter(Boolean)
-        .map(element =>
-            element.getBoundingClientRect()
-        );
+        1.7;
 }
 
 
@@ -943,160 +775,99 @@ function getCollisionRects() {
    SQUASH
    ========================================= */
 
-function squashHorizontal() {
+function squashX() {
 
-    /*
-        Удар слева/справа.
+    ball.scaleX = 0.58;
+    ball.scaleY = 1.15;
 
-        Сжимаем по X,
-        слегка растягиваем по Y.
-    */
-
-    pooPhysics.scaleX =
-        0.58;
-
-    pooPhysics.scaleY =
-        1.15;
-
-
-    pooPhysics.targetScaleX =
-        1;
-
-    pooPhysics.targetScaleY =
-        1;
+    ball.targetScaleX = 1;
+    ball.targetScaleY = 1;
 }
 
 
-function squashVertical() {
+function squashY() {
 
-    /*
-        Удар сверху/снизу.
+    ball.scaleX = 1.15;
+    ball.scaleY = 0.58;
 
-        Сжимаем по Y,
-        слегка растягиваем по X.
-    */
-
-    pooPhysics.scaleX =
-        1.15;
-
-    pooPhysics.scaleY =
-        0.58;
-
-
-    pooPhysics.targetScaleX =
-        1;
-
-    pooPhysics.targetScaleY =
-        1;
+    ball.targetScaleX = 1;
+    ball.targetScaleY = 1;
 }
 
 
 /* =========================================
-   WALL COLLISION
+   SCREEN COLLISION
    ========================================= */
 
-function checkScreenCollision() {
-
-    const halfW =
-        pooPhysics.width / 2;
-
-    const halfH =
-        pooPhysics.height / 2;
-
-
-    /*
-        Левая стена
-    */
+function screenCollision() {
 
     if (
-        pooPhysics.x <= 0 &&
-        pooPhysics.vx < 0
+        ball.x <= 0 &&
+        ball.vx < 0
     ) {
 
-        pooPhysics.x = 0;
+        ball.x = 0;
 
-        pooPhysics.vx =
+        ball.vx =
             Math.abs(
-                pooPhysics.vx
+                ball.vx
             );
 
-
-        squashHorizontal();
+        squashX();
     }
 
 
-    /*
-        Правая стена
-    */
-
     if (
-        pooPhysics.x +
-        pooPhysics.width >=
-        width &&
-
-        pooPhysics.vx > 0
+        ball.x +
+        ball.size >= w &&
+        ball.vx > 0
     ) {
 
-        pooPhysics.x =
-            width -
-            pooPhysics.width;
+        ball.x =
+            w -
+            ball.size;
 
-
-        pooPhysics.vx =
+        ball.vx =
             -Math.abs(
-                pooPhysics.vx
+                ball.vx
             );
 
-
-        squashHorizontal();
+        squashX();
     }
 
 
-    /*
-        Верхняя стена
-    */
-
     if (
-        pooPhysics.y <= 0 &&
-        pooPhysics.vy < 0
+        ball.y <= 0 &&
+        ball.vy < 0
     ) {
 
-        pooPhysics.y = 0;
+        ball.y = 0;
 
-        pooPhysics.vy =
+        ball.vy =
             Math.abs(
-                pooPhysics.vy
+                ball.vy
             );
 
-
-        squashVertical();
+        squashY();
     }
 
 
-    /*
-        Нижняя стена
-    */
-
     if (
-        pooPhysics.y +
-        pooPhysics.height >=
-        height &&
-
-        pooPhysics.vy > 0
+        ball.y +
+        ball.size >= h &&
+        ball.vy > 0
     ) {
 
-        pooPhysics.y =
-            height -
-            pooPhysics.height;
+        ball.y =
+            h -
+            ball.size;
 
-
-        pooPhysics.vy =
+        ball.vy =
             -Math.abs(
-                pooPhysics.vy
+                ball.vy
             );
 
-
-        squashVertical();
+        squashY();
     }
 }
 
@@ -1105,21 +876,21 @@ function checkScreenCollision() {
    RECTANGLE COLLISION
    ========================================= */
 
-function checkRectCollision(rect) {
+function rectangleCollision(rect) {
 
     const left =
-        pooPhysics.x;
+        ball.x;
 
     const right =
-        pooPhysics.x +
-        pooPhysics.width;
+        ball.x +
+        ball.size;
 
     const top =
-        pooPhysics.y;
+        ball.y;
 
     const bottom =
-        pooPhysics.y +
-        pooPhysics.height;
+        ball.y +
+        ball.size;
 
 
     const overlapX =
@@ -1144,10 +915,6 @@ function checkRectCollision(rect) {
         );
 
 
-    /*
-        Нет пересечения.
-    */
-
     if (
         overlapX <= 0 ||
         overlapY <= 0
@@ -1156,17 +923,13 @@ function checkRectCollision(rect) {
     }
 
 
-    /*
-        Центры.
-    */
+    const centerX =
+        ball.x +
+        ball.size / 2;
 
-    const pooCenterX =
-        left +
-        pooPhysics.width / 2;
-
-    const pooCenterY =
-        top +
-        pooPhysics.height / 2;
+    const centerY =
+        ball.y +
+        ball.size / 2;
 
 
     const rectCenterX =
@@ -1179,126 +942,70 @@ function checkRectCollision(rect) {
 
 
     const dx =
-        pooCenterX -
+        centerX -
         rectCenterX;
 
     const dy =
-        pooCenterY -
+        centerY -
         rectCenterY;
 
 
-    /*
-        Определяем сторону
-        столкновения по меньшему
-        перекрытию.
-    */
-
-    if (overlapX < overlapY) {
+    if (
+        overlapX <
+        overlapY
+    ) {
 
         if (dx < 0) {
 
-            pooPhysics.x =
+            ball.x =
                 rect.left -
-                pooPhysics.width;
+                ball.size;
 
-            pooPhysics.vx =
+            ball.vx =
                 -Math.abs(
-                    pooPhysics.vx
+                    ball.vx
                 );
 
         } else {
 
-            pooPhysics.x =
+            ball.x =
                 rect.right;
 
-            pooPhysics.vx =
+            ball.vx =
                 Math.abs(
-                    pooPhysics.vx
+                    ball.vx
                 );
         }
 
 
-        squashHorizontal();
+        squashX();
 
     } else {
 
         if (dy < 0) {
 
-            pooPhysics.y =
+            ball.y =
                 rect.top -
-                pooPhysics.height;
+                ball.size;
 
-            pooPhysics.vy =
+            ball.vy =
                 -Math.abs(
-                    pooPhysics.vy
+                    ball.vy
                 );
 
         } else {
 
-            pooPhysics.y =
+            ball.y =
                 rect.bottom;
 
-            pooPhysics.vy =
+            ball.vy =
                 Math.abs(
-                    pooPhysics.vy
+                    ball.vy
                 );
         }
 
 
-        squashVertical();
-    }
-
-
-    /*
-        Чуть-чуть увеличиваем
-        скорость после удара,
-        но ставим потолок.
-    */
-
-    const speed =
-        Math.hypot(
-            pooPhysics.vx,
-            pooPhysics.vy
-        );
-
-
-    if (speed < 2.2) {
-
-        const multiplier =
-            2.2 / speed;
-
-
-        pooPhysics.vx *=
-            multiplier;
-
-        pooPhysics.vy *=
-            multiplier;
-    }
-
-
-    const maxSpeed =
-        4.8;
-
-
-    const newSpeed =
-        Math.hypot(
-            pooPhysics.vx,
-            pooPhysics.vy
-        );
-
-
-    if (
-        newSpeed >
-        maxSpeed
-    ) {
-
-        pooPhysics.vx *=
-            maxSpeed /
-            newSpeed;
-
-        pooPhysics.vy *=
-            maxSpeed /
-            newSpeed;
+        squashY();
     }
 }
 
@@ -1307,19 +1014,19 @@ function checkRectCollision(rect) {
    CURSOR COLLISION
    ========================================= */
 
-function checkCursorCollision() {
+function cursorCollision() {
 
     if (!mouse.active)
         return;
 
 
     const centerX =
-        pooPhysics.x +
-        pooPhysics.width / 2;
+        ball.x +
+        ball.size / 2;
 
     const centerY =
-        pooPhysics.y +
-        pooPhysics.height / 2;
+        ball.y +
+        ball.size / 2;
 
 
     const dx =
@@ -1338,31 +1045,24 @@ function checkCursorCollision() {
         );
 
 
-    const collisionRadius =
-        Math.max(
-            pooPhysics.width,
-            pooPhysics.height
-        ) *
-        0.5 +
-        20;
+    const radius =
+        ball.size * 0.5 +
+        18;
 
 
     if (
-        distance >=
-        collisionRadius
+        distance >= radius
     ) {
         return;
     }
 
 
-    if (distance === 0)
+    if (
+        distance === 0
+    ) {
         return;
+    }
 
-
-    /*
-        Направление от курсора
-        к картинке.
-    */
 
     const nx =
         dx / distance;
@@ -1371,80 +1071,53 @@ function checkCursorCollision() {
         dy / distance;
 
 
-    /*
-        Выталкиваем картинку
-        наружу от курсора.
-    */
-
     const push =
-        collisionRadius -
+        radius -
         distance;
 
 
-    pooPhysics.x +=
-        nx *
-        push;
+    ball.x +=
+        nx * push;
 
-    pooPhysics.y +=
-        ny *
-        push;
+    ball.y +=
+        ny * push;
 
 
     /*
-        Отражаем скорость
-        относительно нормали.
+        Отражаем движение
+        от курсора.
     */
 
-    const velocityAlongNormal =
-        pooPhysics.vx * nx +
-        pooPhysics.vy * ny;
+    const dot =
+        ball.vx * nx +
+        ball.vy * ny;
 
 
-    if (
-        velocityAlongNormal < 0
-    ) {
+    if (dot < 0) {
 
-        pooPhysics.vx -=
+        ball.vx -=
             2 *
-            velocityAlongNormal *
+            dot *
             nx;
 
-        pooPhysics.vy -=
+        ball.vy -=
             2 *
-            velocityAlongNormal *
+            dot *
             ny;
     }
 
-
-    /*
-        Сила удара зависит
-        от скорости.
-    */
 
     if (
         Math.abs(nx) >
         Math.abs(ny)
     ) {
 
-        squashHorizontal();
+        squashX();
 
     } else {
 
-        squashVertical();
+        squashY();
     }
-
-
-    /*
-        Небольшой импульс,
-        чтобы курсор ощущался
-        как настоящий объект.
-    */
-
-    pooPhysics.vx +=
-        nx * 0.35;
-
-    pooPhysics.vy +=
-        ny * 0.35;
 }
 
 
@@ -1452,7 +1125,7 @@ function checkCursorCollision() {
    POO ANIMATION
    ========================================= */
 
-let lastPooTime =
+let previousTime =
     performance.now();
 
 
@@ -1460,73 +1133,90 @@ function animatePoo(time) {
 
     const delta =
         Math.min(
-            (time - lastPooTime) /
-            16.6667,
+            (
+                time -
+                previousTime
+            ) / 16.6667,
             2
         );
 
 
-    lastPooTime =
+    previousTime =
         time;
 
 
     /*
-        Двигаем.
+        Движение.
     */
 
-    pooPhysics.x +=
-        pooPhysics.vx *
+    ball.x +=
+        ball.vx *
         delta;
 
-    pooPhysics.y +=
-        pooPhysics.vy *
+    ball.y +=
+        ball.vy *
         delta;
 
 
     /*
-        Столкновения.
+        Столкновение
+        с экраном.
     */
 
-    checkScreenCollision();
-
-
-    const rects =
-        getCollisionRects();
-
-
-    for (
-        const rect of rects
-    ) {
-
-        checkRectCollision(
-            rect
-        );
-    }
-
-
-    checkCursorCollision();
+    screenCollision();
 
 
     /*
-        Плавно возвращаем
-        форму после удара.
+        Столкновение
+        с плашками.
     */
 
-    pooPhysics.scaleX +=
+    const elements = [
+        document.querySelector(
+            ".profile"
+        ),
+        ...cards
+    ];
+
+
+    elements
+        .filter(Boolean)
+        .forEach(element => {
+
+            rectangleCollision(
+                element.getBoundingClientRect()
+            );
+        });
+
+
+    /*
+        Столкновение
+        с курсором.
+    */
+
+    cursorCollision();
+
+
+    /*
+        Плавное восстановление
+        формы после удара.
+    */
+
+    ball.scaleX +=
         (
-            pooPhysics.targetScaleX -
-            pooPhysics.scaleX
+            ball.targetScaleX -
+            ball.scaleX
         ) *
-        0.055 *
+        0.06 *
         delta;
 
 
-    pooPhysics.scaleY +=
+    ball.scaleY +=
         (
-            pooPhysics.targetScaleY -
-            pooPhysics.scaleY
+            ball.targetScaleY -
+            ball.scaleY
         ) *
-        0.055 *
+        0.06 *
         delta;
 
 
@@ -1534,28 +1224,32 @@ function animatePoo(time) {
         Вращение.
     */
 
-    pooPhysics.rotation +=
-        pooPhysics.rotationSpeed *
+    ball.rotation +=
+        ball.rotationSpeed *
         delta;
 
 
     /*
-        Применяем трансформацию.
+        Позиция.
     */
 
     poo.style.left =
-        `${pooPhysics.x}px`;
+        `${ball.x}px`;
 
     poo.style.top =
-        `${pooPhysics.y}px`;
+        `${ball.y}px`;
 
+
+    /*
+        Форма + вращение.
+    */
 
     poo.style.transform =
         `
-        rotate(${pooPhysics.rotation}deg)
+        rotate(${ball.rotation}deg)
         scale(
-            ${pooPhysics.scaleX},
-            ${pooPhysics.scaleY}
+            ${ball.scaleX},
+            ${ball.scaleY}
         )
         `;
 
@@ -1567,141 +1261,40 @@ function animatePoo(time) {
 
 
 /* =========================================
-   DEVICE MODE
+   POO IMAGE LOADED
    ========================================= */
 
-let mobileInterval = null;
-let mobileIndex = 0;
+poo.addEventListener(
+    "load",
+    () => {
 
+        /*
+            Только после загрузки
+            запускаем позиционирование.
+        */
 
-function activateMobileCard() {
+        resetPooPosition();
 
-    cards.forEach(card => {
-
-        card.classList.remove(
-            "mobile-active"
-        );
-    });
-
-
-    const card =
-        cards[mobileIndex];
-
-
-    if (!card)
-        return;
-
-
-    const color =
-        card.dataset.color;
-
-
-    card.classList.add(
-        "mobile-active"
-    );
-
-
-    setTargetColor(
-        color
-    );
-
-
-    mobileIndex =
-        (
-            mobileIndex + 1
-        ) %
-        cards.length;
-}
-
-
-function startMobileAnimation() {
-
-    if (mobileInterval)
-        return;
-
-
-    if (!cards.length)
-        return;
-
-
-    stopAvatarCycle();
-
-
-    mobileIndex = 0;
-
-
-    activateMobileCard();
-
-
-    mobileInterval =
-        setInterval(
-            activateMobileCard,
-            2200
-        );
-}
-
-
-function stopMobileAnimation() {
-
-    if (!mobileInterval)
-        return;
-
-
-    clearInterval(
-        mobileInterval
-    );
-
-
-    mobileInterval = null;
-
-
-    cards.forEach(card => {
-
-        card.classList.remove(
-            "mobile-active"
-        );
-    });
-}
-
-
-function updateDeviceMode() {
-
-    const mobile =
-        window.matchMedia(
-            "(max-width: 760px)"
-        ).matches;
-
-
-    stopMobileAnimation();
-
-
-    if (mobile) {
-
-        startMobileAnimation();
-
-    } else {
-
-        startAvatarCycle();
+        poo.style.display =
+            "block";
     }
-}
+);
+
+
+poo.addEventListener(
+    "error",
+    () => {
+
+        console.error(
+            "Не удалось загрузить assets/poo.png"
+        );
+    }
+);
 
 
 /* =========================================
-   START
+   WINDOW RESIZE
    ========================================= */
-
-resize();
-
-updateDeviceMode();
-
-drawParticles();
-
-initializePoo();
-
-requestAnimationFrame(
-    animatePoo
-);
-
 
 window.addEventListener(
     "resize",
@@ -1709,14 +1302,39 @@ window.addEventListener(
 
         resize();
 
-        pooPhysics.width =
+        resetPooPosition();
+
+
+        if (
             window.innerWidth <= 760
-                ? 58
-                : 72;
+        ) {
 
-        pooPhysics.height =
-            pooPhysics.width;
+            startMobileCards();
 
-        updateDeviceMode();
+        } else {
+
+            stopMobileCards();
+
+            startAvatarColorCycle();
+        }
     }
+);
+
+
+/* =========================================
+   START EVERYTHING
+   ========================================= */
+
+resize();
+
+frame();
+
+updateColor();
+
+startAvatarColorCycle();
+
+startMobileCards();
+
+requestAnimationFrame(
+    animatePoo
 );
