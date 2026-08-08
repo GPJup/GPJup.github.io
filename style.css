@@ -1,3 +1,4 @@
+```css
 :root {
     --accent: #8b5cf6;
     --bg: #07070b;
@@ -107,17 +108,13 @@ main {
 .profile {
     border-radius: 30px;
 
-    /*
-        Высота теперь автоматически
-        совпадает с высотой всей
-        колонки ссылок.
-    */
+    width: 280px;
 
-    height: 100%;
-
-    min-height: 0;
+    height: 450px;
 
     padding: 34px 20px;
+
+    min-height: 0;
 
     display: flex;
 
@@ -442,10 +439,7 @@ body.cursor-active::after {
     }
 
     .profile {
-        /*
-            На телефоне НЕ растягиваем
-            плашку на всю высоту ссылок.
-        */
+        width: 100%;
 
         height: auto;
 
@@ -573,3 +567,4 @@ body.cursor-active::after {
         filter: none;
     }
 }
+```
