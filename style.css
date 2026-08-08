@@ -5,7 +5,6 @@
 
     --mouse-x: -999px;
     --mouse-y: -999px;
-    --mouse-color: #8b5cf6;
 }
 
 * {
@@ -191,8 +190,11 @@ main {
 }
 
 /*
-    Полностью круглая подсветка,
-    следующая за курсором по X и Y.
+    КРУГЛАЯ ПОДСВЕТКА ТОЛЬКО ВНУТРИ
+    САМОЙ КАРТОЧКИ.
+
+    overflow: hidden у .card не позволяет
+    свечению выйти наружу.
 */
 
 .card::before {
@@ -203,7 +205,7 @@ main {
 
     background:
         radial-gradient(
-            circle 135px at var(--mx) var(--my),
+            circle 125px at var(--mx) var(--my),
             color-mix(
                 in srgb,
                 var(--link-color) 30%,
@@ -211,10 +213,10 @@ main {
             ),
             color-mix(
                 in srgb,
-                var(--link-color) 12%,
+                var(--link-color) 11%,
                 transparent
             ) 35%,
-            transparent 75%
+            transparent 72%
         );
 
     opacity: 0;
@@ -226,8 +228,8 @@ main {
 }
 
 /*
-    Дополнительное мягкое свечение
-    по внутреннему краю карточки.
+    Внутреннее свечение также ограничено
+    пределами карточки.
 */
 
 .card::after {
@@ -242,11 +244,7 @@ main {
 
     box-shadow:
         inset 0 0 35px
-        color-mix(
-            in srgb,
-            var(--link-color) 0%,
-            transparent
-        );
+        rgba(255, 255, 255, 0);
 
     transition:
         box-shadow 0.28s ease;
@@ -316,7 +314,7 @@ main {
 }
 
 /* =========================================
-   BACKGROUND CURSOR GLOW
+   SMALL WHITE BACKGROUND CURSOR GLOW
    ========================================= */
 
 body::after {
@@ -331,23 +329,21 @@ body::after {
 
     background:
         radial-gradient(
-            circle 190px at
+            circle 105px at
             var(--mouse-x)
             var(--mouse-y),
 
-            color-mix(
-                in srgb,
-                var(--mouse-color) 9%,
-                transparent
-            ),
+            rgba(255, 255, 255, 0.045),
 
-            transparent 70%
+            rgba(255, 255, 255, 0.018) 32%,
+
+            transparent 72%
         );
 
     opacity: 0;
 
     transition:
-        opacity 0.25s ease;
+        opacity 0.2s ease;
 }
 
 body.cursor-active::after {
@@ -389,11 +385,6 @@ body.cursor-active::after {
     .card {
         min-height: 70px;
     }
-
-    /*
-        Автоматически активная карточка
-        на телефоне.
-    */
 
     .card.mobile-active {
         transform:
@@ -440,10 +431,9 @@ body.cursor-active::after {
     }
 }
 
-/*
-    На устройствах без hover
-    обычный desktop-hover отключается.
-*/
+/* =========================================
+   NO HOVER DEVICES
+   ========================================= */
 
 @media (hover: none) {
 
