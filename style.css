@@ -51,13 +51,20 @@ main {
     position: relative;
     z-index: 1;
 
-    width: min(1050px, calc(100% - 32px));
+    width:
+        min(
+            1050px,
+            calc(100% - 32px)
+        );
+
     min-height: 100vh;
 
     margin: auto;
 
     display: grid;
-    grid-template-columns: 280px 1fr;
+
+    grid-template-columns:
+        280px 1fr;
 
     gap: 50px;
 
@@ -72,18 +79,25 @@ main {
 
 .profile,
 .card {
-    background: rgba(17, 17, 24, 0.62);
+    background:
+        rgba(17, 17, 24, 0.62);
 
     border:
         1px solid
         rgba(255, 255, 255, 0.1);
 
     box-shadow:
-        0 18px 55px rgba(0, 0, 0, 0.3),
-        inset 0 1px rgba(255, 255, 255, 0.04);
+        0 18px 55px
+        rgba(0, 0, 0, 0.3),
 
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+        inset 0 1px
+        rgba(255, 255, 255, 0.04);
+
+    backdrop-filter:
+        blur(18px);
+
+    -webkit-backdrop-filter:
+        blur(18px);
 }
 
 /* =========================================
@@ -93,14 +107,24 @@ main {
 .profile {
     border-radius: 30px;
 
+    /*
+        Высота теперь автоматически
+        совпадает с высотой всей
+        колонки ссылок.
+    */
+
+    height: 100%;
+
+    min-height: 0;
+
     padding: 34px 20px;
 
-    min-height: 310px;
-
     display: flex;
+
     flex-direction: column;
 
     justify-content: center;
+
     align-items: center;
 }
 
@@ -118,7 +142,8 @@ main {
 
     border-radius: 50%;
 
-    background: var(--avatar-color);
+    background:
+        var(--avatar-color);
 
     box-shadow:
         0 0 45px
@@ -156,6 +181,7 @@ main {
 
 .handle {
     margin-top: 6px;
+
     color: #aaaab6;
 }
 
@@ -165,7 +191,9 @@ main {
 
 .links {
     display: flex;
+
     flex-direction: column;
+
     gap: 15px;
 }
 
@@ -175,6 +203,7 @@ main {
 
 .card {
     --link-color: #8b5cf6;
+
     --mx: 50%;
     --my: 50%;
 
@@ -187,18 +216,23 @@ main {
     padding: 0 26px;
 
     display: flex;
+
     align-items: center;
 
     gap: 20px;
 
     color: white;
+
     text-decoration: none;
 
     overflow: hidden;
 
     transition:
-        transform 0.4s cubic-bezier(.22, 1, .36, 1),
+        transform 0.4s
+        cubic-bezier(.22, 1, .36, 1),
+
         border-color 0.25s ease,
+
         box-shadow 0.25s ease;
 }
 
@@ -210,11 +244,13 @@ main {
     content: "";
 
     position: absolute;
+
     inset: 0;
 
     background:
         radial-gradient(
-            circle 105px at var(--mx) var(--my),
+            circle 105px
+            at var(--mx) var(--my),
 
             color-mix(
                 in srgb,
@@ -243,6 +279,7 @@ main {
     content: "";
 
     position: absolute;
+
     inset: 0;
 
     border-radius: inherit;
@@ -256,6 +293,10 @@ main {
     transition:
         opacity 0.4s ease;
 }
+
+/* =========================================
+   DESKTOP HOVER
+   ========================================= */
 
 .card:hover {
     transform:
@@ -294,6 +335,7 @@ main {
 
 .card > * {
     position: relative;
+
     z-index: 1;
 }
 
@@ -318,6 +360,7 @@ main {
 
 .card span {
     font-size: 18px;
+
     font-weight: 650;
 }
 
@@ -329,6 +372,7 @@ body::after {
     content: "";
 
     position: fixed;
+
     inset: 0;
 
     pointer-events: none;
@@ -337,15 +381,31 @@ body::after {
 
     background:
         radial-gradient(
-            circle 115px at
+            circle 115px
+            at
             var(--mouse-x)
             var(--mouse-y),
 
-            rgba(255, 255, 255, 0.085) 0%,
+            rgba(
+                255,
+                255,
+                255,
+                0.085
+            ) 0%,
 
-            rgba(255, 255, 255, 0.045) 25%,
+            rgba(
+                255,
+                255,
+                255,
+                0.045
+            ) 25%,
 
-            rgba(255, 255, 255, 0.018) 45%,
+            rgba(
+                255,
+                255,
+                255,
+                0.018
+            ) 45%,
 
             transparent 72%
         );
@@ -377,11 +437,20 @@ body.cursor-active::after {
 
         gap: 22px;
 
-        padding: 28px 0 38px;
+        padding:
+            28px 0 38px;
     }
 
     .profile {
+        /*
+            На телефоне НЕ растягиваем
+            плашку на всю высоту ссылок.
+        */
+
+        height: auto;
+
         min-height: 0;
+
         padding: 26px;
     }
 
@@ -394,7 +463,8 @@ body.cursor-active::after {
         min-height: 70px;
 
         transition:
-            transform 0.55s cubic-bezier(.22, 1, .36, 1);
+            transform 0.55s
+            cubic-bezier(.22, 1, .36, 1);
     }
 
     /* =====================================
@@ -427,7 +497,8 @@ body.cursor-active::after {
 
         background:
             radial-gradient(
-                circle 115px at 50% 50%,
+                circle 115px
+                at 50% 50%,
 
                 color-mix(
                     in srgb,
@@ -476,7 +547,12 @@ body.cursor-active::after {
         transform: none;
 
         border-color:
-            rgba(255, 255, 255, 0.1);
+            rgba(
+                255,
+                255,
+                255,
+                0.1
+            );
 
         box-shadow:
             0 18px 55px
@@ -493,6 +569,7 @@ body.cursor-active::after {
 
     .card:hover img {
         transform: none;
+
         filter: none;
     }
 }
