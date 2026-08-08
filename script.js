@@ -18,19 +18,9 @@ let dpr;
 let particles = [];
 
 
-const mouse = {
-    x: -999,
-    y: -999,
-    active: false,
-    color: "#ffffff"
-};
-
-
-const cardColors =
-    cards.map(
-        card => card.dataset.color
-    );
-
+/* =========================================
+   COLORS
+   ========================================= */
 
 const palette = [
     "#8b5cf6",
@@ -39,28 +29,258 @@ const palette = [
 ];
 
 
+const cardColors =
+    cards.map(
+        card => card.dataset.color
+    );
+
+
 /* =========================================
-   AVATAR
+   MOUSE
    ========================================= */
 
-function setAvatarColor(color) {
+const mouse = {
+    x: -999,
+    y: -999,
+    active: false,
+    color: "#ffffff"
+};
 
-    if (!avatar)
+
+/* =========================================
+   COLOR HELPERS
+   ========================================= */
+
+function hexToRgb(hex) {
+
+    hex =
+        hex
+            .replace("#", "")
+            .trim();
+
+
+    if (hex.length === 3) {
+
+        hex =
+            hex
+                .split("")
+                .map(char => char + char)
+                .join("");
+    }
+
+
+    const number =
+        parseInt(hex, 16);
+
+
+    return {
+        r: (number >> 16) & 255,
+        g: (number >> 8) & 255,
+        b: number & 255
+    };
+}
+
+
+function rgbToHex(r, g, b) {
+
+    return (
+        "#" +
+        [r, g, b]
+            .map(value =>
+                Math
+                    .round(value)
+                    .toString(16)
+                    .padStart(2, "0")
+            )
+            .join("")
+    );
+}
+
+
+function lerp(a, b, amount) {
+
+    return a +
+        (b - a) *
+        amount;
+}
+
+
+function interpolateColor(
+    colorA,
+    colorB,
+    amount
+) {
+
+    const a =
+        hexToRgb(colorA);
+
+    const b =
+        hexToRgb(colorB);
+
+
+    return rgbToHex(
+        lerp(a.r, b.r, amount),
+        lerp(a.g, b.g, amount),
+        lerp(a.b, b.b, amount)
+    );
+}
+
+
+/* =========================================
+   SMOOTH COLOR ENGINE
+   ========================================= */
+
+let currentColor =
+    cardColors[0] || "#8b5cf6";
+
+let targetColor =
+    currentColor;
+
+let colorAnimation = null;
+
+
+function setTargetColor(color) {
+
+    targetColor =
+        color;
+
+
+    if (colorAnimation)
         return;
 
 
-    avatar.style.setProperty(
-        "--avatar-color",
-        color
+    colorAnimation =
+        requestAnimationFrame(
+            animateColor
+        );
+}
+
+
+function animateColor() {
+
+    const current =
+        hexToRgb(currentColor);
+
+    const target =
+        hexToRgb(targetColor);
+
+
+    const distance =
+        Math.max(
+            Math.abs(
+                current.r -
+                target.r
+            ),
+
+            Math.abs(
+                current.g -
+                target.g
+            ),
+
+            Math.abs(
+                current.b -
+                target.b
+            )
+        );
+
+
+    /*
+        Чем дальше цвета друг от друга,
+        тем плавнее идёт переход.
+    */
+
+    const speed =
+        1 -
+        Math.pow(
+            0.001,
+            1 / 55
+        );
+
+
+    currentColor =
+        interpolateColor(
+            currentColor,
+            targetColor,
+            speed
+        );
+
+
+    applyColor(
+        currentColor
     );
 
+
+    if (distance < 1) {
+
+        currentColor =
+            targetColor;
+
+        applyColor(
+            currentColor
+        );
+
+        colorAnimation = null;
+
+        return;
+    }
+
+
+    colorAnimation =
+        requestAnimationFrame(
+            animateColor
+        );
+}
+
+
+/* =========================================
+   APPLY COLOR
+   ========================================= */
+
+function applyColor(color) {
 
     document.documentElement.style.setProperty(
         "--accent",
         color
     );
+
+
+    if (avatar) {
+
+        avatar.style.setProperty(
+            "--avatar-color",
+            color
+        );
+    }
+
+
+    /*
+        Все активные карточки получают
+        текущий промежуточный цвет.
+
+        Именно это создаёт настоящий
+        плавный переход.
+    */
+
+    cards.forEach(card => {
+
+        if (
+            card.classList.contains(
+                "mobile-active"
+            )
+        ) {
+
+            card.style.setProperty(
+                "--link-color",
+                color
+            );
+        }
+    });
 }
 
+
+/* =========================================
+   AVATAR CYCLE
+   ========================================= */
 
 let avatarIndex = 0;
 let avatarInterval = null;
@@ -76,7 +296,7 @@ function startAvatarCycle() {
         return;
 
 
-    setAvatarColor(
+    setTargetColor(
         cardColors[avatarIndex]
     );
 
@@ -93,11 +313,11 @@ function startAvatarCycle() {
                 cardColors.length;
 
 
-            setAvatarColor(
+            setTargetColor(
                 cardColors[avatarIndex]
             );
 
-        }, 1300);
+        }, 1800);
 }
 
 
@@ -117,7 +337,7 @@ function stopAvatarCycle() {
 
 
 /* =========================================
-   CANVAS
+   CANVAS RESIZE
    ========================================= */
 
 function resize() {
@@ -231,7 +451,9 @@ function drawParticles() {
     );
 
 
-    for (const particle of particles) {
+    for (
+        const particle of particles
+    ) {
 
         particle.life += 0.008;
 
@@ -272,7 +494,6 @@ function drawParticles() {
             particle.x -
             mouse.x;
 
-
         const dy =
             particle.y -
             mouse.y;
@@ -289,8 +510,7 @@ function drawParticles() {
 
 
         /*
-            Реакция частиц на курсор.
-            Частицы остаются своих цветов.
+            Разлёт частиц от курсора.
         */
 
         if (
@@ -330,7 +550,6 @@ function drawParticles() {
 
         ctx.globalAlpha =
             alpha;
-
 
         ctx.fillStyle =
             particle.c;
@@ -381,10 +600,8 @@ window.addEventListener(
         mouse.x =
             event.clientX;
 
-
         mouse.y =
             event.clientY;
-
 
         mouse.active = true;
 
@@ -457,7 +674,7 @@ cards.forEach(card => {
             stopAvatarCycle();
 
 
-            setAvatarColor(
+            setTargetColor(
                 color
             );
         }
@@ -481,25 +698,15 @@ cards.forEach(card => {
                 card.getBoundingClientRect();
 
 
-            const x =
-                event.clientX -
-                rect.left;
-
-
-            const y =
-                event.clientY -
-                rect.top;
-
-
             card.style.setProperty(
                 "--mx",
-                `${x}px`
+                `${event.clientX - rect.left}px`
             );
 
 
             card.style.setProperty(
                 "--my",
-                `${y}px`
+                `${event.clientY - rect.top}px`
             );
         }
     );
@@ -525,7 +732,7 @@ cards.forEach(card => {
 
 
 /* =========================================
-   MOBILE AUTO HIGHLIGHT
+   MOBILE
    ========================================= */
 
 let mobileInterval = null;
@@ -535,8 +742,7 @@ let mobileIndex = 0;
 function activateMobileCard() {
 
     /*
-        Сначала выключаем
-        все карточки.
+        Убираем старую активную карточку.
     */
 
     cards.forEach(card => {
@@ -560,20 +766,8 @@ function activateMobileCard() {
 
 
     /*
-        ВАЖНО:
-
-        Сначала задаём цвет карточки,
-        потом включаем active.
-
-        Благодаря этому Discord
-        гарантированно получает #5865f2.
+        Включаем новую карточку.
     */
-
-    card.style.setProperty(
-        "--link-color",
-        color
-    );
-
 
     card.classList.add(
         "mobile-active"
@@ -581,11 +775,16 @@ function activateMobileCard() {
 
 
     /*
-        Аватарка получает
-        тот же цвет.
+        ВАЖНО:
+
+        Не меняем --link-color
+        напрямую на новый цвет.
+
+        Вместо этого запускаем
+        плавную интерполяцию.
     */
 
-    setAvatarColor(
+    setTargetColor(
         color
     );
 
@@ -618,7 +817,7 @@ function startMobileAnimation() {
     mobileInterval =
         setInterval(
             activateMobileCard,
-            1600
+            2200
         );
 }
 
@@ -630,7 +829,6 @@ function stopMobileAnimation() {
         clearInterval(
             mobileInterval
         );
-
 
         mobileInterval = null;
     }
