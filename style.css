@@ -190,11 +190,10 @@ main {
 }
 
 /*
-    КРУГЛАЯ ПОДСВЕТКА ТОЛЬКО ВНУТРИ
-    САМОЙ КАРТОЧКИ.
+    КРУГЛАЯ ПОДСВЕТКА.
 
-    overflow: hidden у .card не позволяет
-    свечению выйти наружу.
+    Центр находится ровно под курсором.
+    Градиент не растянут по ширине карточки.
 */
 
 .card::before {
@@ -205,31 +204,32 @@ main {
 
     background:
         radial-gradient(
-            circle 125px at var(--mx) var(--my),
+            circle 105px at var(--mx) var(--my),
             color-mix(
                 in srgb,
-                var(--link-color) 30%,
+                var(--link-color) 34%,
                 transparent
-            ),
+            ) 0%,
+
             color-mix(
                 in srgb,
-                var(--link-color) 11%,
+                var(--link-color) 18%,
                 transparent
-            ) 35%,
-            transparent 72%
+            ) 28%,
+
+            transparent 68%
         );
 
     opacity: 0;
 
     transition:
-        opacity 0.2s ease;
+        opacity 0.18s ease;
 
     pointer-events: none;
 }
 
 /*
-    Внутреннее свечение также ограничено
-    пределами карточки.
+    Очень лёгкое внутреннее свечение.
 */
 
 .card::after {
@@ -314,7 +314,7 @@ main {
 }
 
 /* =========================================
-   SMALL WHITE BACKGROUND CURSOR GLOW
+   BRIGHTER WHITE BACKGROUND CURSOR GLOW
    ========================================= */
 
 body::after {
@@ -329,13 +329,15 @@ body::after {
 
     background:
         radial-gradient(
-            circle 105px at
+            circle 115px at
             var(--mouse-x)
             var(--mouse-y),
 
-            rgba(255, 255, 255, 0.045),
+            rgba(255, 255, 255, 0.085) 0%,
 
-            rgba(255, 255, 255, 0.018) 32%,
+            rgba(255, 255, 255, 0.045) 25%,
+
+            rgba(255, 255, 255, 0.018) 45%,
 
             transparent 72%
         );
@@ -343,7 +345,7 @@ body::after {
     opacity: 0;
 
     transition:
-        opacity 0.2s ease;
+        opacity 0.18s ease;
 }
 
 body.cursor-active::after {
