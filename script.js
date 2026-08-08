@@ -21,9 +21,7 @@ let particles = [];
 const mouse = {
     x: -999,
     y: -999,
-
     active: false,
-
     color: "#ffffff"
 };
 
@@ -42,17 +40,20 @@ const palette = [
 
 
 /* =========================================
-   AVATAR COLOR
+   AVATAR
    ========================================= */
 
 function setAvatarColor(color) {
 
-    if (!avatar) return;
+    if (!avatar)
+        return;
+
 
     avatar.style.setProperty(
         "--avatar-color",
         color
     );
+
 
     document.documentElement.style.setProperty(
         "--accent",
@@ -69,6 +70,7 @@ function startAvatarCycle() {
 
     if (avatarInterval)
         return;
+
 
     if (!cardColors.length)
         return;
@@ -109,12 +111,13 @@ function stopAvatarCycle() {
         avatarInterval
     );
 
+
     avatarInterval = null;
 }
 
 
 /* =========================================
-   CANVAS RESIZE
+   CANVAS
    ========================================= */
 
 function resize() {
@@ -233,10 +236,6 @@ function drawParticles() {
         particle.life += 0.008;
 
 
-        /*
-            Обычное движение частиц.
-        */
-
         particle.x +=
             particle.vx +
             Math.sin(
@@ -251,36 +250,33 @@ function drawParticles() {
             ) * 0.025;
 
 
-        /*
-            Перемещение через границы.
-        */
-
         if (particle.x < -20)
             particle.x =
                 width + 20;
 
+
         if (particle.x > width + 20)
             particle.x = -20;
+
 
         if (particle.y < -20)
             particle.y =
                 height + 20;
 
+
         if (particle.y > height + 20)
             particle.y = -20;
 
-
-        /*
-            Расстояние от курсора.
-        */
 
         const dx =
             particle.x -
             mouse.x;
 
+
         const dy =
             particle.y -
             mouse.y;
+
 
         const distance =
             Math.hypot(
@@ -294,7 +290,7 @@ function drawParticles() {
 
         /*
             Реакция частиц на курсор.
-            Цвет НЕ меняем.
+            Частицы остаются своих цветов.
         */
 
         if (
@@ -307,19 +303,10 @@ function drawParticles() {
                 distance / 150;
 
 
-            /*
-                Ближайшие частицы
-                становятся немного ярче.
-            */
-
             alpha =
                 0.2 +
                 0.45 * force;
 
-
-            /*
-                Мягкое отталкивание.
-            */
 
             if (distance > 0) {
 
@@ -343,6 +330,7 @@ function drawParticles() {
 
         ctx.globalAlpha =
             alpha;
+
 
         ctx.fillStyle =
             particle.c;
@@ -374,7 +362,7 @@ function drawParticles() {
 
 
 /* =========================================
-   CURSOR
+   DESKTOP CURSOR
    ========================================= */
 
 window.addEventListener(
@@ -393,6 +381,7 @@ window.addEventListener(
         mouse.x =
             event.clientX;
 
+
         mouse.y =
             event.clientY;
 
@@ -405,16 +394,11 @@ window.addEventListener(
         );
 
 
-        /*
-            Только координаты.
-            Цвет фона всегда белый
-            и задаётся CSS.
-        */
-
         document.documentElement.style.setProperty(
             "--mouse-x",
             `${mouse.x}px`
         );
+
 
         document.documentElement.style.setProperty(
             "--mouse-y",
@@ -442,7 +426,7 @@ window.addEventListener(
 
 
 /* =========================================
-   CARD HOVER
+   DESKTOP CARDS
    ========================================= */
 
 cards.forEach(card => {
@@ -457,10 +441,6 @@ cards.forEach(card => {
     );
 
 
-    /*
-        Вход на карточку.
-    */
-
     card.addEventListener(
         "pointerenter",
         () => {
@@ -474,11 +454,6 @@ cards.forEach(card => {
             }
 
 
-            /*
-                Цвет используется только
-                самой карточкой и аватаркой.
-            */
-
             stopAvatarCycle();
 
 
@@ -488,10 +463,6 @@ cards.forEach(card => {
         }
     );
 
-
-    /*
-        Движение внутри карточки.
-    */
 
     card.addEventListener(
         "pointermove",
@@ -520,11 +491,6 @@ cards.forEach(card => {
                 rect.top;
 
 
-            /*
-                Круглая подсветка
-                следует за курсором.
-            */
-
             card.style.setProperty(
                 "--mx",
                 `${x}px`
@@ -538,10 +504,6 @@ cards.forEach(card => {
         }
     );
 
-
-    /*
-        Выход с карточки.
-    */
 
     card.addEventListener(
         "pointerleave",
@@ -572,6 +534,11 @@ let mobileIndex = 0;
 
 function activateMobileCard() {
 
+    /*
+        Сначала выключаем
+        все карточки.
+    */
+
     cards.forEach(card => {
 
         card.classList.remove(
@@ -584,8 +551,28 @@ function activateMobileCard() {
         cards[mobileIndex];
 
 
+    if (!card)
+        return;
+
+
     const color =
         card.dataset.color;
+
+
+    /*
+        ВАЖНО:
+
+        Сначала задаём цвет карточки,
+        потом включаем active.
+
+        Благодаря этому Discord
+        гарантированно получает #5865f2.
+    */
+
+    card.style.setProperty(
+        "--link-color",
+        color
+    );
 
 
     card.classList.add(
@@ -593,13 +580,12 @@ function activateMobileCard() {
     );
 
 
+    /*
+        Аватарка получает
+        тот же цвет.
+    */
+
     setAvatarColor(
-        color
-    );
-
-
-    card.style.setProperty(
-        "--link-color",
         color
     );
 
@@ -614,6 +600,7 @@ function startMobileAnimation() {
 
     if (mobileInterval)
         return;
+
 
     if (!cards.length)
         return;
@@ -643,6 +630,7 @@ function stopMobileAnimation() {
         clearInterval(
             mobileInterval
         );
+
 
         mobileInterval = null;
     }
