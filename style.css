@@ -776,3 +776,39 @@ main {
         animation: none;
     }
 }
+.controls{
+  position:fixed;
+  top:16px;
+  left:16px;
+  z-index:1000;
+  display:flex;
+  gap:10px;
+}
+
+.ctrl-btn{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(17,17,24,.62);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  transition:.22s ease;
+  font-size:18px;
+  user-select:none;
+}
+
+.ctrl-btn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(255,255,255,.28);
+}
+
+.ctrl-btn.active{
+  background:rgba(139,92,246,.22);
+  border-color:rgba(139,92,246,.55);
+  box-shadow:0 0 18px rgba(139,92,246,.35);
+}
