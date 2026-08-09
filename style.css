@@ -65,11 +65,7 @@ body {
 
     display: block;
 
-    will-change:
-        transform,
-        left,
-        top,
-        opacity;
+    will-change: transform, left, top;
 
     transform-origin: center center;
 
@@ -103,7 +99,7 @@ body {
     opacity: 0;
 
     transform:
-        translate(0, 0)
+        translate(-50%, -50%)
         scale(0.15);
 
     transform-origin: center center;
@@ -112,8 +108,7 @@ body {
         transform,
         left,
         top,
-        opacity,
-        filter;
+        opacity;
 }
 
 /* =========================================
@@ -152,6 +147,8 @@ main {
 
 .profile,
 .card {
+    position: relative;
+
     background:
         rgba(17, 17, 24, 0.62);
 
@@ -191,11 +188,9 @@ main {
 
     justify-content: center;
     align-items: center;
-}
 
-/* =========================================
-   AVATAR
-   ========================================= */
+    overflow: hidden;
+}
 
 .avatar {
     --avatar-color: #8b5cf6;
@@ -272,8 +267,6 @@ main {
     --mx: 50%;
     --my: 50%;
 
-    position: relative;
-
     min-height: 78px;
 
     border-radius: 22px;
@@ -298,9 +291,7 @@ main {
 
         border-color 0.25s ease,
 
-        box-shadow 0.25s ease,
-
-        opacity 0.15s ease;
+        box-shadow 0.25s ease;
 }
 
 .card::before {
@@ -338,25 +329,6 @@ main {
     pointer-events: none;
 }
 
-.card::after {
-    content: "";
-
-    position: absolute;
-
-    inset: 0;
-
-    border-radius: inherit;
-
-    pointer-events: none;
-
-    box-shadow:
-        inset 0 0 35px
-        rgba(255, 255, 255, 0);
-
-    transition:
-        opacity 0.4s ease;
-}
-
 .card:hover {
     transform:
         translateY(-4px)
@@ -382,19 +354,9 @@ main {
     opacity: 1;
 }
 
-.card:hover::after {
-    box-shadow:
-        inset 0 0 35px
-        color-mix(
-            in srgb,
-            var(--link-color) 10%,
-            transparent
-        );
-}
-
 .card > * {
     position: relative;
-    z-index: 1;
+    z-index: 2;
 }
 
 .card img {
@@ -422,77 +384,221 @@ main {
 }
 
 /* =========================================
-   BURN
+   FIRE EFFECT
    ========================================= */
 
-.card.burning {
-    pointer-events: none;
+/*
+    Поверх плашки появляются
+    несколько слоёв огня.
+*/
 
+.card.burning,
+.profile.burning {
     animation:
-        cardBurn
-        0.9s
-        cubic-bezier(.4, 0, .8, 1)
+        burnBody
+        2.4s
+        ease-in
         forwards;
+
+    pointer-events: none;
 }
 
-.card.burning::before {
+/* Сам огненный слой */
+
+.card.burning::after,
+.profile.burning::after {
+    content: "";
+
+    position: absolute;
+
+    left: -15%;
+    right: -15%;
+
+    bottom: -35px;
+
+    height: 100%;
+
+    z-index: 10;
+
+    pointer-events: none;
+
     opacity: 0;
 
     background:
         radial-gradient(
-            circle,
-            rgba(255, 160, 40, 0.8),
-            rgba(255, 70, 20, 0.35) 35%,
-            transparent 70%
+            ellipse at 15% 100%,
+            rgba(255, 80, 10, 0.95) 0%,
+            rgba(255, 130, 15, 0.7) 13%,
+            transparent 30%
+        ),
+
+        radial-gradient(
+            ellipse at 35% 100%,
+            rgba(255, 190, 35, 0.95) 0%,
+            rgba(255, 90, 5, 0.7) 15%,
+            transparent 32%
+        ),
+
+        radial-gradient(
+            ellipse at 55% 100%,
+            rgba(255, 75, 5, 0.95) 0%,
+            rgba(255, 170, 20, 0.65) 14%,
+            transparent 31%
+        ),
+
+        radial-gradient(
+            ellipse at 75% 100%,
+            rgba(255, 200, 35, 0.95) 0%,
+            rgba(255, 70, 5, 0.65) 15%,
+            transparent 32%
+        ),
+
+        radial-gradient(
+            ellipse at 90% 100%,
+            rgba(255, 80, 5, 0.95) 0%,
+            rgba(255, 150, 15, 0.6) 15%,
+            transparent 32%
+        );
+
+    filter:
+        blur(1px);
+
+    animation:
+        fireRise
+        0.22s
+        ease-in-out
+        infinite alternate;
+}
+
+/*
+    Дополнительный слой дыма.
+*/
+
+.card.burning {
+    box-shadow:
+        0 0 15px
+        rgba(255, 100, 20, 0.75),
+
+        0 0 45px
+        rgba(255, 55, 10, 0.4);
+}
+
+.card.burning::before,
+.profile.burning::before {
+    opacity: 1;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(255, 75, 10, 0.78),
+            rgba(255, 170, 20, 0.22) 25%,
+            transparent 55%
+        );
+
+    animation:
+        fireGlow
+        0.16s
+        infinite alternate;
+}
+
+/* Обугливание */
+
+.card.burning,
+.profile.burning {
+    background:
+        linear-gradient(
+            to top,
+            rgba(20, 10, 5, 0.98),
+            rgba(40, 25, 15, 0.9) 30%,
+            rgba(17, 17, 24, 0.62) 70%
         );
 }
 
-@keyframes cardBurn {
+@keyframes burnBody {
 
     0% {
         opacity: 1;
 
-        transform:
-            scale(1)
-            translateY(0)
-            rotate(0deg);
-
         filter:
             brightness(1)
-            blur(0);
-    }
-
-    18% {
-        filter:
-            brightness(1.8)
-            saturate(2);
-    }
-
-    40% {
-        opacity: 0.92;
+            saturate(1);
 
         transform:
-            scale(1.025)
-            translateY(-3px)
-            rotate(-1deg);
+            translateY(0)
+            scale(1);
+    }
 
+    15% {
         filter:
-            brightness(2)
-            saturate(2)
-            blur(0.5px);
+            brightness(1.55)
+            saturate(1.7);
+    }
+
+    35% {
+        filter:
+            brightness(1.2)
+            saturate(1.4);
+    }
+
+    55% {
+        filter:
+            brightness(0.7)
+            saturate(0.7);
+
+        transform:
+            translateY(-2px)
+            scale(0.995);
+    }
+
+    75% {
+        filter:
+            brightness(0.35)
+            saturate(0.35);
     }
 
     100% {
-        opacity: 0;
-
-        transform:
-            scale(0.82)
-            translateY(25px)
-            rotate(3deg);
+        opacity: 0.28;
 
         filter:
-            brightness(2.5)
-            blur(8px);
+            brightness(0.15)
+            saturate(0)
+            contrast(1.3);
+
+        transform:
+            translateY(4px)
+            scale(0.985);
+    }
+}
+
+@keyframes fireRise {
+
+    from {
+        transform:
+            translateY(5px)
+            scaleY(0.94);
+    }
+
+    to {
+        transform:
+            translateY(-9px)
+            scaleY(1.08);
+    }
+}
+
+@keyframes fireGlow {
+
+    from {
+        opacity: 0.55;
+
+        filter:
+            brightness(0.9);
+    }
+
+    to {
+        opacity: 0.95;
+
+        filter:
+            brightness(1.5);
     }
 }
 
@@ -522,7 +628,7 @@ body::after {
                 255,
                 255,
                 255,
-                0.085
+                0.09
             ) 0%,
 
             rgba(
