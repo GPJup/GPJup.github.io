@@ -560,7 +560,7 @@ cards.forEach(card => {
     );
 
 
-    card.addEventListener(
+   card.addEventListener(
     'pointerenter',
     () => {
 
@@ -568,8 +568,12 @@ cards.forEach(card => {
 
         const c = card.dataset.color;
 
-        cycleIndex =
+        const idx =
             cycleColors.indexOf(c);
+
+        if (idx !== -1) {
+            cycleIndex = idx;
+        }
 
         document.documentElement.style.setProperty(
             '--accent',
@@ -577,7 +581,6 @@ cards.forEach(card => {
         );
     }
 );
-
     card.addEventListener(
         "pointermove",
         event => {
@@ -606,14 +609,9 @@ card.addEventListener(
 
         hovered = false;
 
-        // начинаем со следующего цвета
+        // продолжаем цикл со следующего цвета
         cycleIndex =
             (cycleIndex + 1) % cycleColors.length;
-
-        document.documentElement.style.setProperty(
-            '--accent',
-            cycleColors[cycleIndex]
-        );
     }
 );
 /* =========================================================
@@ -2062,6 +2060,8 @@ poo.style.left =
 poo.style.top =
     `${pooY}px`;
 
+// запускаем частицы
 particleFrame();
 
+// запускаем poo
 pooLoop();
