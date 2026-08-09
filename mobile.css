@@ -142,15 +142,34 @@ main{
     opacity .5s ease;
 }
 
-.card.active::before{
-  left:calc(100% - 120px);
-  opacity:1;
-}
+.card::before{
+  content:'';
+  position:absolute;
+  width:240px;
+  height:240px;
+  left:-120px;
+  top:50%;
+  transform:translateY(-50%);
 
+  background:radial-gradient(
+    circle,
+    color-mix(in srgb,var(--link-color) 38%,transparent) 0%,
+    color-mix(in srgb,var(--link-color) 20%,transparent) 34%,
+    transparent 72%
+  );
+
+  opacity:0;
+
+  transition:
+    left .9s ease,
+    opacity .5s ease;
+}
 .card.active{
-  border-color:color-mix(in srgb,var(--link-color) 72%,white 8%);
+  border-color:color-mix(in srgb,var(--link-color) 78%,white 8%);
+
   box-shadow:
-    0 16px 42px color-mix(in srgb,var(--link-color) 22%,transparent),
+    0 18px 42px color-mix(in srgb,var(--link-color) 28%,transparent),
+    0 0 24px color-mix(in srgb,var(--link-color) 22%,transparent),
     inset 0 1px rgba(255,255,255,.05);
 }
 
