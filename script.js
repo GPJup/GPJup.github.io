@@ -1888,11 +1888,10 @@ function startBurning() {
                 fire.style.opacity = '0';
             }, 2200);
 
-            // И полностью удаляется
-            setTimeout(() => {
-                fire.remove();
-            }, 3100);
-
+           // Огонь удаляется 
+           setTimeout(() => { fire.remove(); }, 3100); 
+           // Сама плашка полностью удаляется из DOM 
+           setTimeout(() => { element.remove(); }, 3200);
         }, index * 180);
 
     });
