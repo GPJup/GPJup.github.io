@@ -1,5 +1,6 @@
 /* =========================================================
-   GPJUP FINAL EVENT VERSION
+   GPJUP FINAL FIXED VERSION
+   particles + card glow + poo bounce + ogscule event + fire
 ========================================================= */
 
 const canvas = document.getElementById('particles');
@@ -18,6 +19,23 @@ const palette = ['#8b5cf6', '#a78bfa', '#6366f1'];
 
 const cards = [...document.querySelectorAll('.card')];
 const profile = document.querySelector('.profile');
+
+/* =========================================================
+   CARD GLOW (ВОЗВРАЩЕНА ПОДСВЕТКА)
+========================================================= */
+
+cards.forEach(card => {
+  const color = card.dataset.color || '#8b5cf6';
+
+  card.style.setProperty('--link-color', color);
+
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+
+    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    card.style.setProperty('--my', `${e.clientY - r.top}px`);
+  });
+});
 
 /* =========================================================
    SOUNDS
@@ -144,10 +162,35 @@ function updatePoo() {
   poo.style.left = pooX + 'px';
   poo.style.top = pooY + 'px';
 }
-
 /* =========================================================
    COLLISIONS
 ========================================================= */
+
+function bounceFromCursor() {
+  if (!mouse.active || eventTriggered) return;
+
+  const cx = pooX + pooSize / 2;
+  const cy = pooY + pooSize / 2;
+
+  const dx = cx - mouse.x;
+  const dy = cy - mouse.y;
+
+  const dist = Math.hypot(dx, dy);
+  const radius = pooSize * 0.5;
+
+  if (dist < radius + 14 && dist > 0) {
+    const nx = dx / dist;
+    const ny = dy / dist;
+
+    const speed = Math.max(2.4, Math.hypot(pooVX, pooVY));
+
+    pooVX = nx * speed;
+    pooVY = ny * speed;
+
+    pooX += nx * 8;
+    pooY += ny * 8;
+  }
+}
 
 function bounceRect(rect) {
   const left = pooX;
@@ -189,6 +232,8 @@ function pooLoop() {
 
     cards.forEach(c => bounceRect(c.getBoundingClientRect()));
     if (profile) bounceRect(profile.getBoundingClientRect());
+
+    bounceFromCursor();
 
     const touchingLeft = pooX <= 2;
     const touchingRight = pooX + pooSize >= w - 2;
@@ -362,73 +407,3 @@ function fallPoo() {
     startBurning();
   };
 }
-
-/* =========================================================
-   FIRE
-========================================================= */
-
-function addFire(el) {
-  const r = el.getBoundingClientRect();
-
-  const fire = document.createElement('img');
-  fire.src = 'assets/fire.gif';
-  fire.className = 'real-fire';
-
-  Object.assign(fire.style, {
-    position: 'fixed',
-    left: (r.left - 20) + 'px',
-    top: (r.top - 10) + 'px',
-    width: (r.width + 40) + 'px',
-    height: (r.height + 20) + 'px',
-    objectFit: 'cover',
-    pointerEvents: 'none',
-    zIndex: 50,
-    mixBlendMode: 'screen'
-  });
-
-  document.body.appendChild(fire);
-
-  el.animate(
-    [
-      { filter: 'brightness(1)', opacity: 1 },
-      { filter: 'brightness(1.4)', opacity: 1, offset: .3 },
-      { filter: 'brightness(.5) saturate(.4)', opacity: .9, offset: .7 },
-      { filter: 'brightness(0) saturate(0) blur(3px)', opacity: 0 }
-    ],
-    {
-      duration: 3000,
-      easing: 'ease',
-      fill: 'forwards'
-    }
-  );
-
-  setTimeout(() => fire.remove(), 3200);
-}
-
-function startBurning() {
-  fireSound.currentTime = 0;
-  fireSound.play();
-
-  const all = [profile, ...cards];
-
-  all.forEach((el, i) => {
-    setTimeout(() => addFire(el), i * 180);
-  });
-
-  setTimeout(() => {
-    fireSound.pause();
-  }, 6500);
-}
-
-/* =========================================================
-   START
-========================================================= */
-
-resize();
-addEventListener('resize', resize);
-
-resetPoo();
-updatePoo();
-
-pooLoop();
-frame();
