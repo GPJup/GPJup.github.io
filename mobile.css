@@ -109,10 +109,16 @@ main{
   color:#fff;
   text-decoration:none;
   overflow:hidden;
+
+  /* НЕАКТИВНАЯ КАРТОЧКА */
+  border-color:rgba(255,255,255,.10);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.22),
+    inset 0 1px rgba(255,255,255,.04);
+
   transition:
-    transform .24s ease,
-    border-color .6s ease,
-    box-shadow .6s ease;
+    border-color .7s ease,
+    box-shadow .7s ease;
 }
 
 /* Подсветка своего цвета */
