@@ -1839,7 +1839,64 @@ function dropPoo(
         fall
     );
 }
+/* =========================================================
+   BURNING
+========================================================= */
 
+function startBurning() {
+
+    playSound('fire', 1);
+
+    const elements = [
+        profile,
+        ...cards
+    ].filter(Boolean);
+
+    elements.forEach((element, index) => {
+
+        setTimeout(() => {
+
+            const rect = element.getBoundingClientRect();
+
+            const fire = createFire(rect);
+
+            element.style.transition =
+                'filter 2.8s ease, opacity 2.8s ease, transform 2.8s ease';
+
+            element.style.filter =
+                'brightness(1.4) saturate(1.5)';
+
+            setTimeout(() => {
+                element.style.filter =
+                    'brightness(.45) saturate(.4)';
+            }, 700);
+
+            setTimeout(() => {
+                element.style.filter =
+                    'brightness(.08) saturate(0) blur(2px)';
+            }, 1500);
+
+            // Плашка начинает исчезать
+            setTimeout(() => {
+                element.style.opacity = '0';
+                element.style.transform = 'scale(.94)';
+            }, 2200);
+
+            // Огонь затухает вместе с плашкой
+            setTimeout(() => {
+                fire.style.transition = 'opacity .8s ease';
+                fire.style.opacity = '0';
+            }, 2200);
+
+            // И полностью удаляется
+            setTimeout(() => {
+                fire.remove();
+            }, 3100);
+
+        }, index * 180);
+
+    });
+}
 
 /* =========================================================
    RESIZE
