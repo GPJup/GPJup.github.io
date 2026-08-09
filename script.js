@@ -618,17 +618,6 @@ cards.forEach(card => {
     );
 });
 
-card.addEventListener(
-    'pointerleave',
-    () => {
-
-        hovered = false;
-
-        // продолжаем цикл со следующего цвета
-        cycleIndex =
-            (cycleIndex + 1) % cycleColors.length;
-    }
-);
 /* =========================================================
    POO
 ========================================================= */
