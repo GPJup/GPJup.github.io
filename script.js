@@ -49,7 +49,70 @@ const sounds = {
     scary: new Audio("assets/scary.mp3"),
     fire: new Audio("assets/fire.mp3")
 };
+/* =========================================================
+   MUSIC PLAYER
+========================================================= */
 
+const musicTracks = [
+  'music/track1.mp3',
+  'music/track2.mp3',
+  'music/track3.mp3',
+  'music/track4.mp3'
+];
+
+let musicEnabled = false;
+let soundEnabled = false;
+
+const music = new Audio();
+music.preload = 'auto';
+music.volume = 0.45;
+
+let currentTrack = -1;
+
+function playRandomTrack() {
+  if (!musicEnabled || musicTracks.length === 0) return;
+
+  let next;
+
+  do {
+    next = Math.floor(Math.random() * musicTracks.length);
+  } while (musicTracks.length > 1 && next === currentTrack);
+
+  currentTrack = next;
+  music.src = musicTracks[next];
+  music.play().catch(()=>{});
+}
+
+music.addEventListener('ended', playRandomTrack);
+
+const musicBtn = document.getElementById('musicBtn');
+const soundBtn = document.getElementById('soundBtn');
+const skipBtn = document.getElementById('skipBtn');
+
+musicBtn.addEventListener('click', () => {
+  unlockAudio();
+
+  musicEnabled = !musicEnabled;
+  musicBtn.classList.toggle('active', musicEnabled);
+
+  if (musicEnabled) {
+    playRandomTrack();
+  } else {
+    music.pause();
+  }
+});
+
+soundBtn.addEventListener('click', () => {
+  unlockAudio();
+
+  soundEnabled = !soundEnabled;
+  soundBtn.classList.toggle('active', soundEnabled);
+});
+
+skipBtn.addEventListener('click', () => {
+  if (!musicEnabled) return;
+  playRandomTrack();
+});
 Object.values(sounds).forEach(audio => {
     audio.preload = "auto";
 });
