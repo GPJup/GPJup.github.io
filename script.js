@@ -41,6 +41,9 @@ const cards = [
     ...document.querySelectorAll(".card")
 ];
 
+const profile =
+    document.querySelector(".profile");
+
 const avatar =
     document.querySelector(".avatar");
 
@@ -421,7 +424,745 @@ function frame() {
 
 
 /* =========================================
-   MOUSE
+   AUDIO ENGINE
+   ========================================= */
+
+let audioContext = null;
+
+let fireMasterGain = null;
+let fireNoiseSource = null;
+let fireNoiseGain = null;
+let fireFilter = null;
+let fireCrackleTimer = null;
+
+let audioUnlocked = false;
+
+
+function getAudioContext() {
+
+    try {
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if (!AudioContext)
+            return null;
+
+        if (!audioContext) {
+
+            audioContext =
+                new AudioContext();
+        }
+
+        if (
+            audioContext.state ===
+            "suspended"
+        ) {
+
+            audioContext.resume();
+        }
+
+        audioUnlocked = true;
+
+        return audioContext;
+
+    } catch {
+
+        return null;
+    }
+}
+
+
+/* =========================================
+   UNLOCK AUDIO
+   ========================================= */
+
+function unlockAudio() {
+
+    const audio =
+        getAudioContext();
+
+    if (!audio)
+        return;
+
+    if (
+        audio.state ===
+        "suspended"
+    ) {
+
+        audio.resume();
+    }
+}
+
+
+window.addEventListener(
+    "pointerdown",
+    unlockAudio,
+    {
+        once: false,
+        passive: true
+    }
+);
+
+window.addEventListener(
+    "touchstart",
+    unlockAudio,
+    {
+        once: false,
+        passive: true
+    }
+);
+
+
+/* =========================================
+   SPRING SOUND
+   ========================================= */
+
+function playSpringSound() {
+
+    const audio =
+        getAudioContext();
+
+    if (!audio)
+        return;
+
+    const now =
+        audio.currentTime;
+
+
+    const oscillator =
+        audio.createOscillator();
+
+    const gain =
+        audio.createGain();
+
+
+    oscillator.type =
+        "sine";
+
+
+    oscillator.frequency.setValueAtTime(
+        700,
+        now
+    );
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+        120,
+        now + 0.45
+    );
+
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.18,
+        now + 0.015
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.5
+    );
+
+
+    oscillator.connect(
+        gain
+    );
+
+    gain.connect(
+        audio.destination
+    );
+
+
+    oscillator.start(now);
+
+    oscillator.stop(
+        now + 0.52
+    );
+
+
+    const spring =
+        audio.createOscillator();
+
+    const springGain =
+        audio.createGain();
+
+
+    spring.type =
+        "triangle";
+
+
+    spring.frequency.setValueAtTime(
+        460,
+        now
+    );
+
+    spring.frequency.exponentialRampToValueAtTime(
+        70,
+        now + 0.58
+    );
+
+
+    springGain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+    springGain.gain.exponentialRampToValueAtTime(
+        0.1,
+        now + 0.015
+    );
+
+    springGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.58
+    );
+
+
+    spring.connect(
+        springGain
+    );
+
+    springGain.connect(
+        audio.destination
+    );
+
+
+    spring.start(now);
+
+    spring.stop(
+        now + 0.6
+    );
+}
+
+
+/* =========================================
+   SCREAM
+   ========================================= */
+
+function playScreamSound() {
+
+    const audio =
+        getAudioContext();
+
+    if (!audio)
+        return;
+
+    const now =
+        audio.currentTime;
+
+
+    const scream =
+        audio.createOscillator();
+
+    const screamGain =
+        audio.createGain();
+
+
+    scream.type =
+        "sawtooth";
+
+
+    scream.frequency.setValueAtTime(
+        760,
+        now
+    );
+
+    scream.frequency.exponentialRampToValueAtTime(
+        1550,
+        now + 0.18
+    );
+
+    scream.frequency.exponentialRampToValueAtTime(
+        360,
+        now + 0.72
+    );
+
+
+    screamGain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+    screamGain.gain.exponentialRampToValueAtTime(
+        0.11,
+        now + 0.025
+    );
+
+    screamGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.8
+    );
+
+
+    scream.connect(
+        screamGain
+    );
+
+    screamGain.connect(
+        audio.destination
+    );
+
+
+    scream.start(now);
+
+    scream.stop(
+        now + 0.82
+    );
+
+
+    const scream2 =
+        audio.createOscillator();
+
+    const gain2 =
+        audio.createGain();
+
+
+    scream2.type =
+        "triangle";
+
+
+    scream2.frequency.setValueAtTime(
+        520,
+        now
+    );
+
+    scream2.frequency.exponentialRampToValueAtTime(
+        1100,
+        now + 0.2
+    );
+
+    scream2.frequency.exponentialRampToValueAtTime(
+        250,
+        now + 0.72
+    );
+
+
+    gain2.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+    gain2.gain.exponentialRampToValueAtTime(
+        0.07,
+        now + 0.025
+    );
+
+    gain2.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.75
+    );
+
+
+    scream2.connect(
+        gain2
+    );
+
+    gain2.connect(
+        audio.destination
+    );
+
+
+    scream2.start(now);
+
+    scream2.stop(
+        now + 0.78
+    );
+}
+
+
+/* =========================================
+   FIRE SOUND
+   ========================================= */
+
+/*
+    Создаём шумовой генератор.
+
+    Он имитирует шипение огня.
+*/
+
+function createFireNoise() {
+
+    const audio =
+        getAudioContext();
+
+    if (!audio)
+        return null;
+
+
+    const bufferSize =
+        audio.sampleRate * 2;
+
+    const buffer =
+        audio.createBuffer(
+            1,
+            bufferSize,
+            audio.sampleRate
+        );
+
+    const data =
+        buffer.getChannelData(0);
+
+
+    for (
+        let i = 0;
+        i < bufferSize;
+        i++
+    ) {
+
+        /*
+            Белый шум +
+            небольшая модуляция.
+        */
+
+        data[i] =
+            (
+                Math.random() * 2 -
+                1
+            ) *
+            0.8;
+    }
+
+
+    const source =
+        audio.createBufferSource();
+
+    source.buffer =
+        buffer;
+
+    source.loop =
+        true;
+
+
+    /*
+        Фильтр делает шум
+        похожим на шипение.
+    */
+
+    const filter =
+        audio.createBiquadFilter();
+
+    filter.type =
+        "bandpass";
+
+    filter.frequency.value =
+        2400;
+
+    filter.Q.value =
+        0.8;
+
+
+    const gain =
+        audio.createGain();
+
+    gain.gain.value =
+        0.0001;
+
+
+    source.connect(
+        filter
+    );
+
+    filter.connect(
+        gain
+    );
+
+    gain.connect(
+        audio.destination
+    );
+
+
+    source.start();
+
+
+    fireNoiseSource =
+        source;
+
+    fireFilter =
+        filter;
+
+    fireNoiseGain =
+        gain;
+
+    return {
+        source,
+        filter,
+        gain
+    };
+}
+
+
+/* =========================================
+   FIRE CRACKLE
+   ========================================= */
+
+function fireCrackle() {
+
+    const audio =
+        getAudioContext();
+
+    if (!audio)
+        return;
+
+
+    const now =
+        audio.currentTime;
+
+
+    /*
+        Короткий случайный
+        щелчок / треск.
+    */
+
+    const oscillator =
+        audio.createOscillator();
+
+    const gain =
+        audio.createGain();
+
+
+    oscillator.type =
+        Math.random() > 0.5
+            ? "square"
+            : "triangle";
+
+
+    const frequency =
+        500 +
+        Math.random() * 1800;
+
+
+    oscillator.frequency.setValueAtTime(
+        frequency,
+        now
+    );
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+        80,
+        now + 0.035
+    );
+
+
+    const volume =
+        0.015 +
+        Math.random() * 0.035;
+
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        volume,
+        now + 0.003
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.04
+    );
+
+
+    oscillator.connect(
+        gain
+    );
+
+    gain.connect(
+        audio.destination
+    );
+
+
+    oscillator.start(now);
+
+    oscillator.stop(
+        now + 0.045
+    );
+}
+
+
+/* =========================================
+   START FIRE SOUND
+   ========================================= */
+
+function startFireSound() {
+
+    const audio =
+        getAudioContext();
+
+    if (!audio)
+        return;
+
+
+    stopFireSound();
+
+
+    const noise =
+        createFireNoise();
+
+    if (!noise)
+        return;
+
+
+    const now =
+        audio.currentTime;
+
+
+    fireMasterGain =
+        audio.createGain();
+
+    fireMasterGain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+    fireMasterGain.gain.exponentialRampToValueAtTime(
+        0.16,
+        now + 0.18
+    );
+
+
+    /*
+        Перенаправляем основной
+        шум через master gain.
+    */
+
+    noise.gain.disconnect();
+
+    noise.gain.connect(
+        fireMasterGain
+    );
+
+    fireMasterGain.connect(
+        audio.destination
+    );
+
+
+    /*
+        Частые потрескивания.
+    */
+
+    fireCrackleTimer =
+        setInterval(
+            () => {
+
+                if (
+                    !audioContext ||
+                    audioContext.state !==
+                    "running"
+                ) {
+                    return;
+                }
+
+                /*
+                    Иногда два щелчка
+                    подряд.
+                */
+
+                fireCrackle();
+
+                if (
+                    Math.random() >
+                    0.65
+                ) {
+                    setTimeout(
+                        fireCrackle,
+                        30 +
+                        Math.random() * 70
+                    );
+                }
+
+            },
+            90
+        );
+}
+
+
+/* =========================================
+   STOP FIRE SOUND
+   ========================================= */
+
+function stopFireSound() {
+
+    if (
+        fireCrackleTimer
+    ) {
+
+        clearInterval(
+            fireCrackleTimer
+        );
+
+        fireCrackleTimer =
+            null;
+    }
+
+
+    if (
+        fireMasterGain &&
+        audioContext
+    ) {
+
+        const now =
+            audioContext.currentTime;
+
+        fireMasterGain.gain.cancelScheduledValues(
+            now
+        );
+
+        fireMasterGain.gain.setValueAtTime(
+            Math.max(
+                fireMasterGain.gain.value,
+                0.0001
+            ),
+            now
+        );
+
+        fireMasterGain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + 0.7
+        );
+    }
+
+
+    if (
+        fireNoiseSource
+    ) {
+
+        const source =
+            fireNoiseSource;
+
+        fireNoiseSource =
+            null;
+
+        setTimeout(
+            () => {
+
+                try {
+                    source.stop();
+                } catch {}
+            },
+            800
+        );
+    }
+
+
+    fireMasterGain =
+        null;
+
+    fireNoiseGain =
+        null;
+
+    fireFilter =
+        null;
+}
+
+
+/* =========================================
+   MOBILE / POINTER
    ========================================= */
 
 window.addEventListener(
@@ -458,7 +1199,8 @@ window.addEventListener(
     "pointerleave",
     () => {
 
-        mouse.active = false;
+        mouse.active =
+            false;
 
         document.body.classList.remove(
             "cursor-active"
@@ -669,7 +1411,7 @@ document.body.appendChild(
 
 
 /* =========================================
-   OGSCULE
+   OGS CULE
    ========================================= */
 
 const ogscule =
@@ -772,37 +1514,6 @@ function squashY() {
 
 
 /* =========================================
-   CORNER
-   ========================================= */
-
-function isCornerCollision() {
-
-    const margin = 2;
-
-    const left =
-        ball.x <= margin;
-
-    const right =
-        ball.x +
-        ball.size >=
-        w - margin;
-
-    const top =
-        ball.y <= margin;
-
-    const bottom =
-        ball.y +
-        ball.size >=
-        h - margin;
-
-    return (
-        (left || right) &&
-        (top || bottom)
-    );
-}
-
-
-/* =========================================
    SCREEN COLLISION
    ========================================= */
 
@@ -876,13 +1587,6 @@ function screenCollision() {
 
         hitY = true;
     }
-
-    /*
-        Важный момент:
-        финал запускается именно
-        при физическом попадании
-        в настоящий угол.
-    */
 
     if (
         hitX &&
@@ -1136,326 +1840,6 @@ function cursorCollision() {
 
 
 /* =========================================
-   AUDIO
-   ========================================= */
-
-let audioContext = null;
-
-
-function getAudioContext() {
-
-    try {
-
-        const AudioContext =
-            window.AudioContext ||
-            window.webkitAudioContext;
-
-        if (!AudioContext)
-            return null;
-
-        if (!audioContext) {
-
-            audioContext =
-                new AudioContext();
-        }
-
-        if (
-            audioContext.state ===
-            "suspended"
-        ) {
-
-            audioContext.resume();
-        }
-
-        return audioContext;
-
-    } catch {
-
-        return null;
-    }
-}
-
-
-/* =========================================
-   SPRING SOUND
-   ========================================= */
-
-function playSpringSound() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return;
-
-    const now =
-        audio.currentTime;
-
-
-    const oscillator =
-        audio.createOscillator();
-
-    const gain =
-        audio.createGain();
-
-
-    oscillator.type =
-        "sine";
-
-
-    oscillator.frequency.setValueAtTime(
-        700,
-        now
-    );
-
-    oscillator.frequency.exponentialRampToValueAtTime(
-        120,
-        now + 0.45
-    );
-
-
-    gain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.18,
-        now + 0.015
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.5
-    );
-
-
-    oscillator.connect(
-        gain
-    );
-
-    gain.connect(
-        audio.destination
-    );
-
-
-    oscillator.start(now);
-
-    oscillator.stop(
-        now + 0.52
-    );
-
-
-    /*
-        Дополнительный
-        металлический слой.
-    */
-
-    const spring =
-        audio.createOscillator();
-
-    const springGain =
-        audio.createGain();
-
-
-    spring.type =
-        "triangle";
-
-
-    spring.frequency.setValueAtTime(
-        460,
-        now
-    );
-
-    spring.frequency.exponentialRampToValueAtTime(
-        70,
-        now + 0.58
-    );
-
-
-    springGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    springGain.gain.exponentialRampToValueAtTime(
-        0.1,
-        now + 0.015
-    );
-
-    springGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.58
-    );
-
-
-    spring.connect(
-        springGain
-    );
-
-    springGain.connect(
-        audio.destination
-    );
-
-
-    spring.start(now);
-
-    spring.stop(
-        now + 0.6
-    );
-}
-
-
-/* =========================================
-   SCREAM SOUND
-   ========================================= */
-
-function playScreamSound() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return;
-
-    const now =
-        audio.currentTime;
-
-
-    /*
-        Генерируем резкий
-        мультяшный крик.
-    */
-
-    const scream =
-        audio.createOscillator();
-
-    const screamGain =
-        audio.createGain();
-
-
-    scream.type =
-        "sawtooth";
-
-
-    scream.frequency.setValueAtTime(
-        760,
-        now
-    );
-
-    scream.frequency.exponentialRampToValueAtTime(
-        1550,
-        now + 0.18
-    );
-
-    scream.frequency.exponentialRampToValueAtTime(
-        360,
-        now + 0.72
-    );
-
-
-    screamGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    screamGain.gain.exponentialRampToValueAtTime(
-        0.11,
-        now + 0.025
-    );
-
-    screamGain.gain.exponentialRampToValueAtTime(
-        0.07,
-        now + 0.28
-    );
-
-    screamGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.8
-    );
-
-
-    scream.connect(
-        screamGain
-    );
-
-    screamGain.connect(
-        audio.destination
-    );
-
-
-    scream.start(now);
-
-    scream.stop(
-        now + 0.82
-    );
-
-
-    /*
-        Второй голос.
-    */
-
-    const scream2 =
-        audio.createOscillator();
-
-    const gain2 =
-        audio.createGain();
-
-
-    scream2.type =
-        "triangle";
-
-
-    scream2.frequency.setValueAtTime(
-        520,
-        now
-    );
-
-    scream2.frequency.exponentialRampToValueAtTime(
-        1100,
-        now + 0.2
-    );
-
-    scream2.frequency.exponentialRampToValueAtTime(
-        250,
-        now + 0.72
-    );
-
-
-    gain2.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    gain2.gain.exponentialRampToValueAtTime(
-        0.07,
-        now + 0.025
-    );
-
-    gain2.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.75
-    );
-
-
-    scream2.connect(
-        gain2
-    );
-
-    gain2.connect(
-        audio.destination
-    );
-
-
-    scream2.start(now);
-
-    scream2.stop(
-        now + 0.78
-    );
-}
-
-
-/* =========================================
    FINAL STATE
    ========================================= */
 
@@ -1466,10 +1850,8 @@ const finalSequence = {
     cornerX: 0,
     cornerY: 0,
 
-    centerX: 0,
-    centerY: 0,
-
-    enlargedSize: 0,
+    cornerSideX: "left",
+    cornerSideY: "top",
 
     falling: false,
 
@@ -1483,7 +1865,7 @@ const finalSequence = {
 
 
 /* =========================================
-   OGSCULE: CORNER -> CENTER
+   OGS CULE -> CENTER
    ========================================= */
 
 function animateOgsculeToCenter() {
@@ -1491,22 +1873,11 @@ function animateOgsculeToCenter() {
     return new Promise(
         resolve => {
 
-            /*
-                Размер уже задан CSS.
-
-                Старт:
-                прямо в углу.
-
-                Финиш:
-                центр экрана.
-            */
-
             const startX =
                 finalSequence.cornerX;
 
             const startY =
                 finalSequence.cornerY;
-
 
             const endX =
                 w / 2;
@@ -1514,10 +1885,8 @@ function animateOgsculeToCenter() {
             const endY =
                 h / 2;
 
-
             const start =
                 performance.now();
-
 
             const duration =
                 1050;
@@ -1535,19 +1904,12 @@ function animateOgsculeToCenter() {
                         1
                     );
 
-
-                /*
-                    Плавное движение
-                    к центру.
-                */
-
                 const eased =
                     1 -
                     Math.pow(
                         1 - progress,
                         3
                     );
-
 
                 const x =
                     startX +
@@ -1557,7 +1919,6 @@ function animateOgsculeToCenter() {
                     ) *
                     eased;
 
-
                 const y =
                     startY +
                     (
@@ -1566,28 +1927,15 @@ function animateOgsculeToCenter() {
                     ) *
                     eased;
 
-
-                /*
-                    Одновременно
-                    сильно увеличиваем.
-                */
-
                 const scale =
                     0.15 +
                     0.85 *
                     eased;
 
-
-                /*
-                    Небольшое
-                    вращение.
-                */
-
                 const rotation =
                     -12 +
                     12 *
                     eased;
-
 
                 ogscule.style.left =
                     `${x}px`;
@@ -1595,13 +1943,11 @@ function animateOgsculeToCenter() {
                 ogscule.style.top =
                     `${y}px`;
 
-
                 ogscule.style.opacity =
                     `${Math.min(
                         1,
                         progress * 5
                     )}`;
-
 
                 ogscule.style.transform =
                     `
@@ -1609,7 +1955,6 @@ function animateOgsculeToCenter() {
                     scale(${scale})
                     rotate(${rotation}deg)
                     `;
-
 
                 if (
                     progress <
@@ -1636,7 +1981,7 @@ function animateOgsculeToCenter() {
 
 
 /* =========================================
-   OGSCULE SPRING
+   OGS CULE SPRING
    ========================================= */
 
 function animateOgsculeSpring() {
@@ -1663,18 +2008,6 @@ function animateOgsculeSpring() {
                         1
                     );
 
-
-                /*
-                    Пружина:
-                    маленькая
-                    ->
-                    большая
-                    ->
-                    маленькая
-                    ->
-                    нормальная.
-                */
-
                 const spring =
                     Math.exp(
                         -5 *
@@ -1686,12 +2019,10 @@ function animateOgsculeSpring() {
                         6
                     );
 
-
                 const scale =
                     1 -
                     spring *
                     0.42;
-
 
                 const scaleX =
                     scale *
@@ -1705,7 +2036,6 @@ function animateOgsculeSpring() {
                         0.09
                     );
 
-
                 const scaleY =
                     scale *
                     (
@@ -1717,7 +2047,6 @@ function animateOgsculeSpring() {
                         ) *
                         0.09
                     );
-
 
                 ogscule.style.transform =
                     `
@@ -1734,7 +2063,6 @@ function animateOgsculeSpring() {
                         ) * 5}deg
                     )
                     `;
-
 
                 if (
                     progress <
@@ -1767,7 +2095,7 @@ function animateOgsculeSpring() {
 
 
 /* =========================================
-   OGSCULE FALLS UNDER SCREEN
+   OGS CULE FALL
    ========================================= */
 
 function animateOgsculeFall() {
@@ -1778,83 +2106,46 @@ function animateOgsculeFall() {
             const startX =
                 w / 2;
 
-            const startY =
-                h / 2;
-
-
             let y =
-                startY;
-
+                h / 2;
 
             let velocity =
                 0;
-
 
             const gravity =
                 0.62;
 
 
-            const duration =
-                1000;
-
-
-            const start =
-                performance.now();
-
-
-            /*
-                Крик начинается
-                в момент начала падения.
-            */
-
             playScreamSound();
 
 
-            function animate(time) {
-
-                const elapsed =
-                    time -
-                    start;
-
+            function animate() {
 
                 velocity +=
                     gravity;
 
-
                 y +=
                     velocity;
 
-
-                const progress =
-                    Math.min(
-                        elapsed /
-                        duration,
-                        1
-                    );
-
-
-                /*
-                    Пока падает,
-                    слегка наклоняется.
-                */
-
                 const rotation =
-                    progress *
-                    18;
-
-
-                /*
-                    Небольшое растяжение
-                    по вертикали.
-                */
+                    Math.min(
+                        velocity * 1.8,
+                        35
+                    );
 
                 const scaleX =
                     1 -
-                    progress * 0.08;
+                    Math.min(
+                        velocity * 0.008,
+                        0.12
+                    );
 
                 const scaleY =
                     1 +
-                    progress * 0.15;
+                    Math.min(
+                        velocity * 0.012,
+                        0.18
+                    );
 
 
                 ogscule.style.left =
@@ -1862,7 +2153,6 @@ function animateOgsculeFall() {
 
                 ogscule.style.top =
                     `${y}px`;
-
 
                 ogscule.style.transform =
                     `
@@ -1874,12 +2164,6 @@ function animateOgsculeFall() {
                     rotate(${rotation}deg)
                     `;
 
-
-                /*
-                    После выхода
-                    за экран полностью
-                    исчезает.
-                */
 
                 if (
                     y >
@@ -1896,13 +2180,6 @@ function animateOgsculeFall() {
                 }
 
 
-                /*
-                    Если duration
-                    прошёл, всё равно
-                    продолжаем до
-                    выхода за экран.
-                */
-
                 requestAnimationFrame(
                     animate
                 );
@@ -1918,26 +2195,117 @@ function animateOgsculeFall() {
 
 
 /* =========================================
-   BURN CARDS
+   BURN ELEMENTS
    ========================================= */
 
-function burnCards() {
+function burnElement(
+    element,
+    delay
+) {
 
-    cards.forEach(
-        (card, index) => {
+    return new Promise(
+        resolve => {
 
             setTimeout(
                 () => {
 
-                    card.classList.add(
+                    element.classList.add(
+                        "burning"
+                    );
+
+                    setTimeout(
+                        resolve,
+                        2400
+                    );
+
+                },
+                delay
+            );
+        }
+    );
+}
+
+
+/* =========================================
+   BURN ALL
+   ========================================= */
+
+async function burnAllCards() {
+
+    /*
+        ВАЖНО:
+        profile находится отдельно
+        от .card, поэтому его тоже
+        добавляем вручную.
+    */
+
+    const allElements = [
+        profile,
+        ...cards
+    ];
+
+
+    /*
+        Запускаем звук сразу,
+        когда начинается огонь.
+    */
+
+    startFireSound();
+
+
+    /*
+        Горение начинается
+        слева направо.
+    */
+
+    allElements.forEach(
+        (element, index) => {
+
+            if (!element)
+                return;
+
+            setTimeout(
+                () => {
+
+                    element.classList.add(
                         "burning"
                     );
 
                 },
-                index * 100
+                index * 180
             );
         }
     );
+
+
+    /*
+        Ждём пока последний
+        элемент закончит гореть.
+    */
+
+    const totalTime =
+        (
+            allElements.length *
+            180
+        ) +
+        2400;
+
+
+    await new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                totalTime
+            )
+    );
+
+
+    /*
+        Плавно выключаем
+        звук огня.
+    */
+
+    stopFireSound();
 }
 
 
@@ -1956,20 +2324,16 @@ function movePooToCenter() {
             const startY =
                 ball.y;
 
-
             const targetX =
                 w / 2 -
                 ball.size;
-
 
             const targetY =
                 h / 2 -
                 ball.size;
 
-
             const start =
                 performance.now();
-
 
             const duration =
                 650;
@@ -1987,14 +2351,12 @@ function movePooToCenter() {
                         1
                     );
 
-
                 const eased =
                     1 -
                     Math.pow(
                         1 - progress,
                         3
                     );
-
 
                 ball.x =
                     startX +
@@ -2004,7 +2366,6 @@ function movePooToCenter() {
                     ) *
                     eased;
 
-
                 ball.y =
                     startY +
                     (
@@ -2013,27 +2374,20 @@ function movePooToCenter() {
                     ) *
                     eased;
 
-
-                const scale =
-                    1 +
-                    eased;
-
-
-                poo.style.transform =
-                    `
-                    rotate(${ball.rotation}deg)
-                    scale(
-                        ${scale},
-                        ${scale}
-                    )
-                    `;
-
-
                 poo.style.left =
                     `${ball.x}px`;
 
                 poo.style.top =
                     `${ball.y}px`;
+
+                poo.style.transform =
+                    `
+                    rotate(0deg)
+                    scale(
+                        ${1 + eased},
+                        ${1 + eased}
+                    )
+                    `;
 
 
                 if (
@@ -2061,7 +2415,7 @@ function movePooToCenter() {
 
 
 /* =========================================
-   POO FALL
+   POO FINAL FALL
    ========================================= */
 
 function fallPoo() {
@@ -2083,8 +2437,7 @@ function fallPoo() {
 
 
             finalSequence.fallY =
-                h / 2 -
-                enlargedSize / 2;
+                -enlargedSize;
 
 
             finalSequence.groundY =
@@ -2101,30 +2454,31 @@ function fallPoo() {
                 0.48;
 
 
-            let finished =
-                false;
-
-
             function animate() {
-
-                if (finished)
-                    return;
-
 
                 finalSequence.fallVelocity +=
                     gravity;
-
 
                 finalSequence.fallY +=
                     finalSequence.fallVelocity;
 
 
-                const rotation =
-                    Math.min(
-                        finalSequence.fallVelocity *
-                        1.8,
-                        35
-                    );
+                /*
+                    Никакого вращения.
+                    Падает строго вертикально.
+                */
+
+                poo.style.left =
+                    `${finalSequence.fallX}px`;
+
+                poo.style.top =
+                    `${finalSequence.fallY}px`;
+
+                poo.style.transform =
+                    `
+                    rotate(0deg)
+                    scale(2, 2)
+                    `;
 
 
                 if (
@@ -2143,46 +2497,56 @@ function fallPoo() {
                         `${finalSequence.fallY}px`;
 
 
+                    /*
+                        Небольшое сжатие
+                        при ударе о пол.
+                    */
+
                     poo.style.transform =
                         `
-                        rotate(${rotation}deg)
-                        scale(2.28, 1.68)
+                        rotate(0deg)
+                        scale(
+                            2.16,
+                            1.82
+                        )
                         `;
 
 
                     setTimeout(
                         () => {
 
+                            /*
+                                Возвращаем ровную
+                                форму.
+                            */
+
                             poo.style.transform =
                                 `
-                                rotate(${rotation}deg)
+                                rotate(0deg)
                                 scale(2, 2)
                                 `;
 
-                            finished = true;
+
+                            /*
+                                Фиксируем позицию.
+                            */
+
+                            finalSequence.fallY =
+                                finalSequence.groundY;
+
+
+                            poo.style.top =
+                                `${finalSequence.groundY}px`;
+
 
                             resolve();
 
                         },
-                        230
+                        180
                     );
-
 
                     return;
                 }
-
-
-                poo.style.left =
-                    `${finalSequence.fallX}px`;
-
-                poo.style.top =
-                    `${finalSequence.fallY}px`;
-
-                poo.style.transform =
-                    `
-                    rotate(${rotation}deg)
-                    scale(2, 2)
-                    `;
 
 
                 requestAnimationFrame(
@@ -2221,62 +2585,45 @@ async function triggerFinalSequence() {
 
 
     /*
-        Определяем настоящий
-        угол столкновения.
+        Пытаемся разблокировать
+        аудио перед началом.
+    */
+
+    getAudioContext();
+
+
+    /*
+        Определяем угол.
     */
 
     const hitLeft =
-        ball.x <=
-        ball.size * 0.5;
+        ball.x <
+        w / 2;
 
     const hitTop =
-        ball.y <=
-        ball.size * 0.5;
+        ball.y <
+        h / 2;
+
+
+    finalSequence.cornerX =
+        hitLeft
+            ? 0
+            : w;
+
+    finalSequence.cornerY =
+        hitTop
+            ? 0
+            : h;
 
 
     /*
-        Координаты угла.
-
-        OGScule будет стартовать
-        именно отсюда.
-    */
-
-    if (hitLeft) {
-
-        finalSequence.cornerX =
-            0;
-
-    } else {
-
-        finalSequence.cornerX =
-            w;
-    }
-
-
-    if (hitTop) {
-
-        finalSequence.cornerY =
-            0;
-
-    } else {
-
-        finalSequence.cornerY =
-            h;
-    }
-
-
-    /*
-        Poo временно скрываем.
+        Poo исчезает на время
+        появления OGScule.
     */
 
     poo.style.opacity =
         "0";
 
-
-    /*
-        OGScule ставим
-        непосредственно в угол.
-    */
 
     ogscule.style.left =
         `${finalSequence.cornerX}px`;
@@ -2287,26 +2634,16 @@ async function triggerFinalSequence() {
     ogscule.style.opacity =
         "0";
 
-    ogscule.style.transform =
-        `
-        translate(-50%, -50%)
-        scale(0.15)
-        `;
-
 
     /*
-        1.
-        Из угла в центр
-        с увеличением.
+        Угол -> центр.
     */
 
     await animateOgsculeToCenter();
 
 
     /*
-        2.
-        Пружинная анимация
-        в центре.
+        Пружина.
     */
 
     playSpringSound();
@@ -2315,55 +2652,41 @@ async function triggerFinalSequence() {
 
 
     /*
-        3.
-        Проваливание
-        под экран + крик.
+        Падение + крик.
     */
 
     await animateOgsculeFall();
 
 
     /*
-        4.
-        Только после полного
-        исчезновения OGScule
-        сгорают плашки.
+        ОГРОМНЫЙ момент:
+        после ухода OGScule
+        начинается настоящее
+        горение.
     */
 
-    burnCards();
+    await burnAllCards();
 
 
     /*
-        Небольшая пауза,
-        чтобы плашки успели
-        начать сгорать.
-    */
-
-    await new Promise(
-        resolve =>
-            setTimeout(
-                resolve,
-                350
-            )
-    );
-
-
-    /*
-        5.
-        Возвращаем poo
-        в центр ×2.
+        Возвращаем poo.
     */
 
     poo.style.opacity =
         "1";
 
 
+    /*
+        Сначала ставим его
+        в центр.
+    */
+
     await movePooToCenter();
 
 
     /*
-        6.
-        И он падает.
+        Затем он падает
+        вертикально вниз.
     */
 
     await fallPoo();
@@ -2420,9 +2743,7 @@ function animatePoo(time) {
 
 
     const elements = [
-        document.querySelector(
-            ".profile"
-        ),
+        profile,
         ...cards
     ];
 
