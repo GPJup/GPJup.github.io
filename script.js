@@ -509,6 +509,44 @@ window.addEventListener(
    CARD LIGHTING
 ========================================================= */
 
+/* =========================================================
+   AVATAR COLOR CYCLE
+========================================================= */
+
+const cycleColors = [
+    '#66c0f4', // Steam
+    '#1ed760', // Spotify
+    '#5865f2', // Discord
+    '#ff0050', // TikTok
+    '#229ed9'  // Telegram
+];
+
+let cycleIndex = 0;
+let cycleInterval = null;
+let hovered = false;
+
+function startAvatarCycle(){
+
+    clearInterval(cycleInterval);
+
+    cycleInterval = setInterval(() => {
+
+        if (hovered) return;
+
+        cycleIndex =
+            (cycleIndex + 1) % cycleColors.length;
+
+        document.documentElement.style.setProperty(
+            '--accent',
+            cycleColors[cycleIndex]
+        );
+
+    }, 2200);
+}
+
+// стартуем цикл
+startAvatarCycle();
+
 cards.forEach(card => {
 
     const color =
@@ -523,16 +561,22 @@ cards.forEach(card => {
 
 
     card.addEventListener(
-        "pointerenter",
-        () => {
+    'pointerenter',
+    () => {
 
-            document.documentElement.style.setProperty(
-                "--accent",
-                color
-            );
-        }
-    );
+        hovered = true;
 
+        const c = card.dataset.color;
+
+        cycleIndex =
+            cycleColors.indexOf(c);
+
+        document.documentElement.style.setProperty(
+            '--accent',
+            c
+        );
+    }
+);
 
     card.addEventListener(
         "pointermove",
@@ -556,7 +600,22 @@ cards.forEach(card => {
     );
 });
 
+card.addEventListener(
+    'pointerleave',
+    () => {
 
+        hovered = false;
+
+        // начинаем со следующего цвета
+        cycleIndex =
+            (cycleIndex + 1) % cycleColors.length;
+
+        document.documentElement.style.setProperty(
+            '--accent',
+            cycleColors[cycleIndex]
+        );
+    }
+);
 /* =========================================================
    POO
 ========================================================= */
