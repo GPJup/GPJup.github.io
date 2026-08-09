@@ -53,11 +53,11 @@ const sounds = {
    MUSIC PLAYER
 ========================================================= */
 
-const musicTracks = [
-  'music/track1.mp3',
-  'music/track2.mp3',
-  'music/track3.mp3',
-  'music/track4.mp3'
+const musicTracks = [ 
+   'music/1.mp3', 
+   'music/2.mp3', 
+   'music/3.mp3', 
+   'music/4.mp3' 
 ];
 
 let musicEnabled = false;
@@ -175,7 +175,9 @@ window.addEventListener(
 */
 
 function playSound(name, volume = 1) {
-    const audio = sounds[name];
+   if (!soundEnabled) return;
+    
+   const audio = sounds[name];
 
     if (!audio) {
         return;
@@ -623,45 +625,59 @@ function resetPoo() {
 
     pooSize =
         window.innerWidth <= 760
-            ? 65
+            ? 58
             : 85;
 
-    pooBaseSize =
-        pooSize;
+    pooBaseSize = pooSize;
 
+    const obstacles = [profile, ...cards].filter(Boolean);
 
-    pooX =
-        Math.random() *
-        Math.max(
-            1,
-            w - pooSize
-        );
+    let attempts = 0;
+    let valid = false;
 
+    while (!valid && attempts < 200) {
 
-    pooY =
-        Math.random() *
-        Math.max(
-            1,
-            h - pooSize
-        );
+        attempts++;
 
+        pooX =
+            Math.random() *
+            Math.max(1, w - pooSize);
+
+        pooY =
+            Math.random() *
+            Math.max(1, h - pooSize);
+
+        const rect = {
+            left: pooX,
+            right: pooX + pooSize,
+            top: pooY,
+            bottom: pooY + pooSize
+        };
+
+        valid = obstacles.every(el => {
+
+            const r = el.getBoundingClientRect();
+
+            return (
+                rect.right < r.left - 12 ||
+                rect.left > r.right + 12 ||
+                rect.bottom < r.top - 12 ||
+                rect.top > r.bottom + 12
+            );
+        });
+    }
 
     const angle =
         Math.random() *
-        Math.PI *
-        2;
+        Math.PI * 2;
 
     const speed = 2.2;
 
-
     pooVX =
-        Math.cos(angle) *
-        speed;
+        Math.cos(angle) * speed;
 
     pooVY =
-        Math.sin(angle) *
-        speed;
-
+        Math.sin(angle) * speed;
 
     poo.style.width =
         `${pooSize}px`;
@@ -669,7 +685,6 @@ function resetPoo() {
     poo.style.height =
         `${pooSize}px`;
 }
-
 
 /* =========================================================
    POO VS RECTANGLE
@@ -916,69 +931,56 @@ function updatePooVisual() {
 
 function checkPooEdges() {
 
-    if (
-        pooY <= 0
-    ) {
+    // На телефоне оставляем рамку вокруг контента
+    const margin =
+        window.innerWidth <= 760
+            ? 14
+            : 0;
 
-        pooY = 0;
+    if (pooY <= margin) {
+
+        pooY = margin;
 
         pooVY =
-            Math.abs(
-                pooVY
-            );
+            Math.abs(pooVY);
 
         pooSquash = 1;
     }
 
+    if (pooX <= margin) {
 
-    if (
-        pooX <= 0
-    ) {
-
-        pooX = 0;
+        pooX = margin;
 
         pooVX =
-            Math.abs(
-                pooVX
-            );
+            Math.abs(pooVX);
 
         pooSquash = 1;
     }
 
-
     if (
-        pooX +
-        pooSize >=
-        w
+        pooX + pooSize >=
+        w - margin
     ) {
 
         pooX =
-            w -
-            pooSize;
+            w - margin - pooSize;
 
         pooVX =
-            -Math.abs(
-                pooVX
-            );
+            -Math.abs(pooVX);
 
         pooSquash = 1;
     }
 
-
     if (
-        pooY +
-        pooSize >=
-        h
+        pooY + pooSize >=
+        h - margin
     ) {
 
         pooY =
-            h -
-            pooSize;
+            h - margin - pooSize;
 
         pooVY =
-            -Math.abs(
-                pooVY
-            );
+            -Math.abs(pooVY);
 
         pooSquash = 1;
     }
