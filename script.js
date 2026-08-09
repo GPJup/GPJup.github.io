@@ -1,12 +1,11 @@
-/* =========================================
-   PARTICLES
-   ========================================= */
+/* =========================================================
+   GPJUP SITE
+   Particles + cursor glow + cards + poo screensaver
+   + ogscule event + fire system + generated sounds
+========================================================= */
 
-const canvas =
-    document.getElementById("particles");
-
-const ctx =
-    canvas.getContext("2d");
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
 
 let w = 0;
 let h = 0;
@@ -14,233 +13,311 @@ let dpr = 1;
 
 let particles = [];
 
+const mouse = {
+    x: -999,
+    y: -999,
+    active: false,
+    color: "#ffffff"
+};
+
 const palette = [
     "#8b5cf6",
     "#a78bfa",
     "#6366f1"
 ];
 
-
-/* =========================================
-   MOUSE
-   ========================================= */
-
-const mouse = {
-    x: -9999,
-    y: -9999,
-    active: false,
-    color: "#ffffff"
-};
-
-
-/* =========================================
-   CARDS
-   ========================================= */
-
 const cards = [
     ...document.querySelectorAll(".card")
 ];
 
-const profile =
-    document.querySelector(".profile");
+/* =========================================================
+   AUDIO
+========================================================= */
 
-const avatar =
-    document.querySelector(".avatar");
+let audioContext = null;
+let fireAudio = null;
 
+function initAudio() {
+    if (audioContext) return;
 
-/* =========================================
-   COLORS
-   ========================================= */
+    try {
+        audioContext =
+            new (window.AudioContext ||
+                window.webkitAudioContext)();
 
-const cardColors =
-    cards.map(
-        card => card.dataset.color
-    );
-
-let currentColor =
-    "#8b5cf6";
-
-let targetColor =
-    "#8b5cf6";
-
-
-function hexToRgb(hex) {
-
-    hex =
-        hex
-            .replace("#", "")
-            .trim();
-
-    if (hex.length === 3) {
-
-        hex =
-            hex
-                .split("")
-                .map(x => x + x)
-                .join("");
-    }
-
-    const n =
-        parseInt(hex, 16);
-
-    return [
-        (n >> 16) & 255,
-        (n >> 8) & 255,
-        n & 255
-    ];
-}
-
-
-function rgbToHex(r, g, b) {
-
-    return (
-        "#" +
-        [r, g, b]
-            .map(value =>
-                Math
-                    .round(value)
-                    .toString(16)
-                    .padStart(2, "0")
-            )
-            .join("")
-    );
-}
-
-
-function mixColor(a, b, t) {
-
-    const A =
-        hexToRgb(a);
-
-    const B =
-        hexToRgb(b);
-
-    return rgbToHex(
-        A[0] + (B[0] - A[0]) * t,
-        A[1] + (B[1] - A[1]) * t,
-        A[2] + (B[2] - A[2]) * t
-    );
-}
-
-
-function setColor(color) {
-
-    targetColor = color;
-}
-
-
-function colorLoop() {
-
-    currentColor =
-        mixColor(
-            currentColor,
-            targetColor,
-            0.035
-        );
-
-    document.documentElement.style.setProperty(
-        "--accent",
-        currentColor
-    );
-
-    if (avatar) {
-
-        avatar.style.setProperty(
-            "--avatar-color",
-            currentColor
+        if (audioContext.state === "suspended") {
+            audioContext.resume();
+        }
+    } catch (error) {
+        console.warn(
+            "Web Audio недоступен:",
+            error
         );
     }
-
-    requestAnimationFrame(
-        colorLoop
-    );
 }
 
+function playSpringSound() {
+    initAudio();
 
-/* =========================================
-   AVATAR COLOR CYCLE
-   ========================================= */
+    if (!audioContext) return;
 
-let avatarColorIndex = 0;
-let avatarColorTimer = null;
+    const now = audioContext.currentTime;
 
+    const oscillator =
+        audioContext.createOscillator();
 
-function startAvatarColorCycle() {
+    const gain =
+        audioContext.createGain();
 
-    if (avatarColorTimer)
-        return;
+    oscillator.type = "sine";
 
-    if (!cardColors.length)
-        return;
+    oscillator.frequency.setValueAtTime(
+        160,
+        now
+    );
 
-    avatarColorTimer =
-        setInterval(() => {
+    oscillator.frequency.exponentialRampToValueAtTime(
+        720,
+        now + 0.12
+    );
 
-            if (
-                mouse.active ||
-                finalSequence.started
-            ) {
-                return;
-            }
+    oscillator.frequency.exponentialRampToValueAtTime(
+        110,
+        now + 0.55
+    );
 
-            avatarColorIndex =
-                (
-                    avatarColorIndex + 1
-                ) %
-                cardColors.length;
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
 
-            setColor(
-                cardColors[
-                    avatarColorIndex
-                ]
+    gain.gain.exponentialRampToValueAtTime(
+        0.2,
+        now + 0.025
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 0.58
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start(now);
+    oscillator.stop(now + 0.6);
+}
+
+function playScreamSound() {
+    initAudio();
+
+    if (!audioContext) return;
+
+    const now = audioContext.currentTime;
+
+    const oscillator =
+        audioContext.createOscillator();
+
+    const gain =
+        audioContext.createGain();
+
+    oscillator.type = "sawtooth";
+
+    oscillator.frequency.setValueAtTime(
+        480,
+        now
+    );
+
+    oscillator.frequency.exponentialRampToValueAtTime(
+        105,
+        now + 1.25
+    );
+
+    gain.gain.setValueAtTime(
+        0.0001,
+        now
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.16,
+        now + 0.04
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + 1.3
+    );
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.start(now);
+    oscillator.stop(now + 1.35);
+}
+
+/*
+    Генератор потрескивания.
+
+    Здесь используется шумовой источник + фильтр.
+    Каждый импульс немного отличается,
+    поэтому звук не превращается в короткий
+    зацикленный "тррр".
+*/
+
+function startFireSound() {
+    initAudio();
+
+    if (!audioContext) return;
+    if (fireAudio) return;
+
+    const master =
+        audioContext.createGain();
+
+    const filter =
+        audioContext.createBiquadFilter();
+
+    filter.type = "bandpass";
+    filter.frequency.value = 900;
+    filter.Q.value = 0.7;
+
+    master.gain.value = 0.055;
+
+    filter.connect(master);
+    master.connect(
+        audioContext.destination
+    );
+
+    const bufferSize =
+        audioContext.sampleRate * 2;
+
+    const buffer =
+        audioContext.createBuffer(
+            1,
+            bufferSize,
+            audioContext.sampleRate
+        );
+
+    const data =
+        buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] =
+            Math.random() * 2 - 1;
+    }
+
+    const source =
+        audioContext.createBufferSource();
+
+    source.buffer = buffer;
+    source.loop = true;
+
+    source.connect(filter);
+    source.start();
+
+    fireAudio = {
+        source,
+        master,
+        filter,
+        crackleTimer: null
+    };
+
+    function crackle() {
+        if (!fireAudio) return;
+
+        const now =
+            audioContext.currentTime;
+
+        const osc =
+            audioContext.createOscillator();
+
+        const gain =
+            audioContext.createGain();
+
+        osc.type = "triangle";
+
+        const frequency =
+            700 +
+            Math.random() * 1600;
+
+        osc.frequency.setValueAtTime(
+            frequency,
+            now
+        );
+
+        osc.frequency.exponentialRampToValueAtTime(
+            100,
+            now + 0.045
+        );
+
+        gain.gain.setValueAtTime(
+            0.0001,
+            now
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.12 + Math.random() * 0.12,
+            now + 0.003
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.0001,
+            now + 0.055
+        );
+
+        osc.connect(gain);
+        gain.connect(master);
+
+        osc.start(now);
+        osc.stop(now + 0.06);
+
+        fireAudio.crackleTimer =
+            setTimeout(
+                crackle,
+                50 + Math.random() * 280
             );
+    }
 
-        }, 1800);
+    crackle();
 }
 
+function stopFireSound() {
+    if (!fireAudio) return;
 
-function stopAvatarColorCycle() {
-
-    if (!avatarColorTimer)
-        return;
-
-    clearInterval(
-        avatarColorTimer
+    clearTimeout(
+        fireAudio.crackleTimer
     );
 
-    avatarColorTimer = null;
+    try {
+        fireAudio.source.stop();
+    } catch {}
+
+    try {
+        fireAudio.source.disconnect();
+        fireAudio.master.disconnect();
+        fireAudio.filter.disconnect();
+    } catch {}
+
+    fireAudio = null;
 }
 
-
-/* =========================================
-   RESIZE
-   ========================================= */
+/* =========================================================
+   PARTICLES
+========================================================= */
 
 function resize() {
+    dpr = Math.min(
+        window.devicePixelRatio || 1,
+        2
+    );
 
-    dpr =
-        Math.min(
-            window.devicePixelRatio || 1,
-            2
-        );
+    w = window.innerWidth;
+    h = window.innerHeight;
 
-    w =
-        window.innerWidth;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
 
-    h =
-        window.innerHeight;
-
-    canvas.width =
-        w * dpr;
-
-    canvas.height =
-        h * dpr;
-
-    canvas.style.width =
-        `${w}px`;
-
-    canvas.style.height =
-        `${h}px`;
+    canvas.style.width = w + "px";
+    canvas.style.height = h + "px";
 
     ctx.setTransform(
         dpr,
@@ -251,42 +328,31 @@ function resize() {
         0
     );
 
+    const amount =
+        Math.min(
+            240,
+            Math.max(
+                90,
+                Math.floor(
+                    (w * h) / 7000
+                )
+            )
+        );
+
     particles =
         Array.from(
-            {
-                length:
-                    Math.min(
-                        240,
-                        Math.max(
-                            90,
-                            Math.floor(
-                                w *
-                                h /
-                                7000
-                            )
-                        )
-                    )
-            },
-
+            { length: amount },
             () => ({
-
-                x:
-                    Math.random() * w,
-
-                y:
-                    Math.random() * h,
+                x: Math.random() * w,
+                y: Math.random() * h,
 
                 vx:
-                    (
-                        Math.random() -
-                        0.5
-                    ) * 0.2,
+                    (Math.random() - 0.5) *
+                    0.2,
 
                 vy:
-                    (
-                        Math.random() -
-                        0.5
-                    ) * 0.2,
+                    (Math.random() - 0.5) *
+                    0.2,
 
                 r:
                     0.5 +
@@ -308,13 +374,49 @@ function resize() {
         );
 }
 
+function rgb(hex) {
+    hex = hex.replace("#", "");
 
-/* =========================================
-   PARTICLES
-   ========================================= */
+    if (hex.length === 3) {
+        hex = hex
+            .split("")
+            .map(x => x + x)
+            .join("");
+    }
+
+    const n = parseInt(hex, 16);
+
+    return [
+        (n >> 16) & 255,
+        (n >> 8) & 255,
+        n & 255
+    ];
+}
+
+function mix(a, b, t) {
+    const A = rgb(a);
+    const B = rgb(b);
+
+    return (
+        "rgb(" +
+        A
+            .map(
+                (v, i) =>
+                    Math.round(
+                        v +
+                        (B[i] - v) * t
+                    )
+            )
+            .join(",") +
+        ")"
+    );
+}
+
+/* =========================================================
+   PARTICLE FRAME
+========================================================= */
 
 function frame() {
-
     ctx.clearRect(
         0,
         0,
@@ -322,23 +424,16 @@ function frame() {
         h
     );
 
-    for (
-        const p of particles
-    ) {
-
+    for (const p of particles) {
         p.life += 0.008;
 
         p.x +=
             p.vx +
-            Math.sin(
-                p.life
-            ) * 0.025;
+            Math.sin(p.life) * 0.025;
 
         p.y +=
             p.vy +
-            Math.cos(
-                p.life
-            ) * 0.025;
+            Math.cos(p.life) * 0.025;
 
         if (p.x < -20)
             p.x = w + 20;
@@ -352,55 +447,60 @@ function frame() {
         if (p.y > h + 20)
             p.y = -20;
 
-        const dx =
+        let dx =
             p.x - mouse.x;
 
-        const dy =
+        let dy =
             p.y - mouse.y;
 
-        const dist =
-            Math.hypot(
-                dx,
-                dy
-            );
+        let dist =
+            Math.hypot(dx, dy);
 
         let alpha = 0.2;
+        let color = p.c;
+
+        /*
+            Небольшая белая подсветка вокруг курсора.
+        */
 
         if (
             mouse.active &&
-            dist < 155
+            dist < 115
         ) {
+            const t =
+                1 - dist / 115;
 
-            const force =
-                1 -
-                dist / 155;
+            color = mix(
+                p.c,
+                "#ffffff",
+                t * 0.85
+            );
 
             alpha =
                 0.2 +
-                0.45 * force;
+                0.55 * t;
+
+            /*
+                Частицы мягко отталкиваются.
+            */
 
             if (dist > 0) {
-
-                const push =
-                    force *
-                    force *
-                    1.8;
+                const force =
+                    t * 0.5;
 
                 p.x +=
-                    dx / dist *
-                    push;
+                    (dx / dist) *
+                    force;
 
                 p.y +=
-                    dy / dist *
-                    push;
+                    (dy / dist) *
+                    force;
             }
         }
 
-        ctx.globalAlpha =
-            alpha;
+        ctx.globalAlpha = alpha;
 
-        ctx.fillStyle =
-            p.c;
+        ctx.fillStyle = color;
 
         ctx.beginPath();
 
@@ -417,808 +517,38 @@ function frame() {
 
     ctx.globalAlpha = 1;
 
-    requestAnimationFrame(
-        frame
-    );
+    requestAnimationFrame(frame);
 }
 
-
-/* =========================================
-   AUDIO ENGINE
-   ========================================= */
-
-let audioContext = null;
-
-let fireMasterGain = null;
-let fireNoiseSource = null;
-let fireNoiseGain = null;
-let fireFilter = null;
-let fireCrackleTimer = null;
-
-let audioUnlocked = false;
-
-
-function getAudioContext() {
-
-    try {
-
-        const AudioContext =
-            window.AudioContext ||
-            window.webkitAudioContext;
-
-        if (!AudioContext)
-            return null;
-
-        if (!audioContext) {
-
-            audioContext =
-                new AudioContext();
-        }
-
-        if (
-            audioContext.state ===
-            "suspended"
-        ) {
-
-            audioContext.resume();
-        }
-
-        audioUnlocked = true;
-
-        return audioContext;
-
-    } catch {
-
-        return null;
-    }
-}
-
-
-/* =========================================
-   UNLOCK AUDIO
-   ========================================= */
-
-function unlockAudio() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return;
-
-    if (
-        audio.state ===
-        "suspended"
-    ) {
-
-        audio.resume();
-    }
-}
-
-
-window.addEventListener(
-    "pointerdown",
-    unlockAudio,
-    {
-        once: false,
-        passive: true
-    }
-);
-
-window.addEventListener(
-    "touchstart",
-    unlockAudio,
-    {
-        once: false,
-        passive: true
-    }
-);
-
-
-/* =========================================
-   SPRING SOUND
-   ========================================= */
-
-function playSpringSound() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return;
-
-    const now =
-        audio.currentTime;
-
-
-    const oscillator =
-        audio.createOscillator();
-
-    const gain =
-        audio.createGain();
-
-
-    oscillator.type =
-        "sine";
-
-
-    oscillator.frequency.setValueAtTime(
-        700,
-        now
-    );
-
-    oscillator.frequency.exponentialRampToValueAtTime(
-        120,
-        now + 0.45
-    );
-
-
-    gain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.18,
-        now + 0.015
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.5
-    );
-
-
-    oscillator.connect(
-        gain
-    );
-
-    gain.connect(
-        audio.destination
-    );
-
-
-    oscillator.start(now);
-
-    oscillator.stop(
-        now + 0.52
-    );
-
-
-    const spring =
-        audio.createOscillator();
-
-    const springGain =
-        audio.createGain();
-
-
-    spring.type =
-        "triangle";
-
-
-    spring.frequency.setValueAtTime(
-        460,
-        now
-    );
-
-    spring.frequency.exponentialRampToValueAtTime(
-        70,
-        now + 0.58
-    );
-
-
-    springGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    springGain.gain.exponentialRampToValueAtTime(
-        0.1,
-        now + 0.015
-    );
-
-    springGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.58
-    );
-
-
-    spring.connect(
-        springGain
-    );
-
-    springGain.connect(
-        audio.destination
-    );
-
-
-    spring.start(now);
-
-    spring.stop(
-        now + 0.6
-    );
-}
-
-
-/* =========================================
-   SCREAM
-   ========================================= */
-
-function playScreamSound() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return;
-
-    const now =
-        audio.currentTime;
-
-
-    const scream =
-        audio.createOscillator();
-
-    const screamGain =
-        audio.createGain();
-
-
-    scream.type =
-        "sawtooth";
-
-
-    scream.frequency.setValueAtTime(
-        760,
-        now
-    );
-
-    scream.frequency.exponentialRampToValueAtTime(
-        1550,
-        now + 0.18
-    );
-
-    scream.frequency.exponentialRampToValueAtTime(
-        360,
-        now + 0.72
-    );
-
-
-    screamGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    screamGain.gain.exponentialRampToValueAtTime(
-        0.11,
-        now + 0.025
-    );
-
-    screamGain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.8
-    );
-
-
-    scream.connect(
-        screamGain
-    );
-
-    screamGain.connect(
-        audio.destination
-    );
-
-
-    scream.start(now);
-
-    scream.stop(
-        now + 0.82
-    );
-
-
-    const scream2 =
-        audio.createOscillator();
-
-    const gain2 =
-        audio.createGain();
-
-
-    scream2.type =
-        "triangle";
-
-
-    scream2.frequency.setValueAtTime(
-        520,
-        now
-    );
-
-    scream2.frequency.exponentialRampToValueAtTime(
-        1100,
-        now + 0.2
-    );
-
-    scream2.frequency.exponentialRampToValueAtTime(
-        250,
-        now + 0.72
-    );
-
-
-    gain2.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    gain2.gain.exponentialRampToValueAtTime(
-        0.07,
-        now + 0.025
-    );
-
-    gain2.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.75
-    );
-
-
-    scream2.connect(
-        gain2
-    );
-
-    gain2.connect(
-        audio.destination
-    );
-
-
-    scream2.start(now);
-
-    scream2.stop(
-        now + 0.78
-    );
-}
-
-
-/* =========================================
-   FIRE SOUND
-   ========================================= */
-
-/*
-    Создаём шумовой генератор.
-
-    Он имитирует шипение огня.
-*/
-
-function createFireNoise() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return null;
-
-
-    const bufferSize =
-        audio.sampleRate * 2;
-
-    const buffer =
-        audio.createBuffer(
-            1,
-            bufferSize,
-            audio.sampleRate
-        );
-
-    const data =
-        buffer.getChannelData(0);
-
-
-    for (
-        let i = 0;
-        i < bufferSize;
-        i++
-    ) {
-
-        /*
-            Белый шум +
-            небольшая модуляция.
-        */
-
-        data[i] =
-            (
-                Math.random() * 2 -
-                1
-            ) *
-            0.8;
-    }
-
-
-    const source =
-        audio.createBufferSource();
-
-    source.buffer =
-        buffer;
-
-    source.loop =
-        true;
-
-
-    /*
-        Фильтр делает шум
-        похожим на шипение.
-    */
-
-    const filter =
-        audio.createBiquadFilter();
-
-    filter.type =
-        "bandpass";
-
-    filter.frequency.value =
-        2400;
-
-    filter.Q.value =
-        0.8;
-
-
-    const gain =
-        audio.createGain();
-
-    gain.gain.value =
-        0.0001;
-
-
-    source.connect(
-        filter
-    );
-
-    filter.connect(
-        gain
-    );
-
-    gain.connect(
-        audio.destination
-    );
-
-
-    source.start();
-
-
-    fireNoiseSource =
-        source;
-
-    fireFilter =
-        filter;
-
-    fireNoiseGain =
-        gain;
-
-    return {
-        source,
-        filter,
-        gain
-    };
-}
-
-
-/* =========================================
-   FIRE CRACKLE
-   ========================================= */
-
-function fireCrackle() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return;
-
-
-    const now =
-        audio.currentTime;
-
-
-    /*
-        Короткий случайный
-        щелчок / треск.
-    */
-
-    const oscillator =
-        audio.createOscillator();
-
-    const gain =
-        audio.createGain();
-
-
-    oscillator.type =
-        Math.random() > 0.5
-            ? "square"
-            : "triangle";
-
-
-    const frequency =
-        500 +
-        Math.random() * 1800;
-
-
-    oscillator.frequency.setValueAtTime(
-        frequency,
-        now
-    );
-
-    oscillator.frequency.exponentialRampToValueAtTime(
-        80,
-        now + 0.035
-    );
-
-
-    const volume =
-        0.015 +
-        Math.random() * 0.035;
-
-
-    gain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        volume,
-        now + 0.003
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + 0.04
-    );
-
-
-    oscillator.connect(
-        gain
-    );
-
-    gain.connect(
-        audio.destination
-    );
-
-
-    oscillator.start(now);
-
-    oscillator.stop(
-        now + 0.045
-    );
-}
-
-
-/* =========================================
-   START FIRE SOUND
-   ========================================= */
-
-function startFireSound() {
-
-    const audio =
-        getAudioContext();
-
-    if (!audio)
-        return;
-
-
-    stopFireSound();
-
-
-    const noise =
-        createFireNoise();
-
-    if (!noise)
-        return;
-
-
-    const now =
-        audio.currentTime;
-
-
-    fireMasterGain =
-        audio.createGain();
-
-    fireMasterGain.gain.setValueAtTime(
-        0.0001,
-        now
-    );
-
-    fireMasterGain.gain.exponentialRampToValueAtTime(
-        0.16,
-        now + 0.18
-    );
-
-
-    /*
-        Перенаправляем основной
-        шум через master gain.
-    */
-
-    noise.gain.disconnect();
-
-    noise.gain.connect(
-        fireMasterGain
-    );
-
-    fireMasterGain.connect(
-        audio.destination
-    );
-
-
-    /*
-        Частые потрескивания.
-    */
-
-    fireCrackleTimer =
-        setInterval(
-            () => {
-
-                if (
-                    !audioContext ||
-                    audioContext.state !==
-                    "running"
-                ) {
-                    return;
-                }
-
-                /*
-                    Иногда два щелчка
-                    подряд.
-                */
-
-                fireCrackle();
-
-                if (
-                    Math.random() >
-                    0.65
-                ) {
-                    setTimeout(
-                        fireCrackle,
-                        30 +
-                        Math.random() * 70
-                    );
-                }
-
-            },
-            90
-        );
-}
-
-
-/* =========================================
-   STOP FIRE SOUND
-   ========================================= */
-
-function stopFireSound() {
-
-    if (
-        fireCrackleTimer
-    ) {
-
-        clearInterval(
-            fireCrackleTimer
-        );
-
-        fireCrackleTimer =
-            null;
-    }
-
-
-    if (
-        fireMasterGain &&
-        audioContext
-    ) {
-
-        const now =
-            audioContext.currentTime;
-
-        fireMasterGain.gain.cancelScheduledValues(
-            now
-        );
-
-        fireMasterGain.gain.setValueAtTime(
-            Math.max(
-                fireMasterGain.gain.value,
-                0.0001
-            ),
-            now
-        );
-
-        fireMasterGain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            now + 0.7
-        );
-    }
-
-
-    if (
-        fireNoiseSource
-    ) {
-
-        const source =
-            fireNoiseSource;
-
-        fireNoiseSource =
-            null;
-
-        setTimeout(
-            () => {
-
-                try {
-                    source.stop();
-                } catch {}
-            },
-            800
-        );
-    }
-
-
-    fireMasterGain =
-        null;
-
-    fireNoiseGain =
-        null;
-
-    fireFilter =
-        null;
-}
-
-
-/* =========================================
-   MOBILE / POINTER
-   ========================================= */
+/* =========================================================
+   MOUSE
+========================================================= */
 
 window.addEventListener(
     "pointermove",
-    event => {
-
-        mouse.x =
-            event.clientX;
-
-        mouse.y =
-            event.clientY;
-
-        mouse.active =
-            true;
-
-        document.body.classList.add(
-            "cursor-active"
-        );
-
-        document.documentElement.style.setProperty(
-            "--mouse-x",
-            `${mouse.x}px`
-        );
-
-        document.documentElement.style.setProperty(
-            "--mouse-y",
-            `${mouse.y}px`
-        );
-    }
+    e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+        mouse.active = true;
+    },
+    { passive: true }
 );
-
 
 window.addEventListener(
     "pointerleave",
     () => {
-
-        mouse.active =
-            false;
-
-        document.body.classList.remove(
-            "cursor-active"
-        );
-
-        startAvatarColorCycle();
+        mouse.active = false;
     }
 );
 
-
-/* =========================================
+/* =========================================================
    CARDS
-   ========================================= */
+========================================================= */
 
 cards.forEach(card => {
-
     const color =
-        card.dataset.color;
+        card.dataset.color ||
+        "#8b5cf6";
 
     card.style.setProperty(
         "--link-color",
@@ -1228,1671 +558,930 @@ cards.forEach(card => {
     card.addEventListener(
         "pointerenter",
         () => {
+            mouse.color = color;
 
-            if (
-                finalSequence.started
-            ) {
-                return;
-            }
-
-            if (
-                window.matchMedia(
-                    "(hover: none)"
-                ).matches
-            ) {
-                return;
-            }
-
-            stopAvatarColorCycle();
-
-            setColor(color);
+            document.documentElement.style.setProperty(
+                "--accent",
+                color
+            );
         }
     );
 
     card.addEventListener(
         "pointermove",
-        event => {
-
-            if (
-                window.matchMedia(
-                    "(hover: none)"
-                ).matches
-            ) {
-                return;
-            }
-
+        e => {
             const rect =
                 card.getBoundingClientRect();
 
             card.style.setProperty(
                 "--mx",
-                `${event.clientX - rect.left}px`
+                `${e.clientX - rect.left}px`
             );
 
             card.style.setProperty(
                 "--my",
-                `${event.clientY - rect.top}px`
+                `${e.clientY - rect.top}px`
             );
-        }
-    );
-
-    card.addEventListener(
-        "pointerleave",
-        () => {
-
-            if (
-                window.matchMedia(
-                    "(hover: none)"
-                ).matches
-            ) {
-                return;
-            }
-
-            startAvatarColorCycle();
         }
     );
 });
 
-
-/* =========================================
-   MOBILE CARDS
-   ========================================= */
-
-let mobileTimer = null;
-let mobileIndex = 0;
-
-
-function activateMobileCard() {
-
-    if (
-        finalSequence.started
-    ) {
-        return;
-    }
-
-    cards.forEach(card => {
-
-        card.classList.remove(
-            "mobile-active"
-        );
-    });
-
-    const card =
-        cards[mobileIndex];
-
-    if (!card)
-        return;
-
-    const color =
-        card.dataset.color;
-
-    card.classList.add(
-        "mobile-active"
-    );
-
-    setColor(color);
-
-    mobileIndex =
-        (
-            mobileIndex + 1
-        ) %
-        cards.length;
-}
-
-
-function startMobileCards() {
-
-    if (
-        window.innerWidth > 760
-    ) {
-        return;
-    }
-
-    if (mobileTimer)
-        return;
-
-    stopAvatarColorCycle();
-
-    activateMobileCard();
-
-    mobileTimer =
-        setInterval(
-            activateMobileCard,
-            2200
-        );
-}
-
-
-function stopMobileCards() {
-
-    if (!mobileTimer)
-        return;
-
-    clearInterval(
-        mobileTimer
-    );
-
-    mobileTimer = null;
-
-    cards.forEach(card => {
-
-        card.classList.remove(
-            "mobile-active"
-        );
-    });
-}
-
-
-/* =========================================
-   POO
-   ========================================= */
+/* =========================================================
+   CREATE POO
+========================================================= */
 
 const poo =
     document.createElement("img");
 
-poo.id =
-    "flying-poo";
-
-poo.src =
-    "assets/poo.png";
-
+poo.id = "poo";
+poo.src = "assets/poo.png";
 poo.alt = "";
 
-poo.draggable = false;
+document.body.appendChild(poo);
 
-poo.setAttribute(
-    "aria-hidden",
-    "true"
-);
+/* =========================================================
+   POO PHYSICS
+========================================================= */
 
-document.body.appendChild(
-    poo
-);
+let pooX = 200;
+let pooY = 200;
 
+let pooVX =
+    2.1;
 
-/* =========================================
-   OGS CULE
-   ========================================= */
+let pooVY =
+    1.7;
 
-const ogscule =
+let pooWidth = 85;
+let pooHeight = 85;
+
+let pooScale = 1;
+
+let pooSquash = 0;
+
+let gameStarted = false;
+let eventTriggered = false;
+
+function resetPooPosition() {
+    pooWidth =
+        window.innerWidth <= 760
+            ? 65
+            : 85;
+
+    pooHeight = pooWidth;
+
+    pooX =
+        Math.random() *
+        Math.max(
+            1,
+            w - pooWidth
+        );
+
+    pooY =
+        Math.random() *
+        Math.max(
+            1,
+            h - pooHeight
+        );
+
+    const angle =
+        Math.random() *
+        Math.PI *
+        2;
+
+    const speed = 2.1;
+
+    pooVX =
+        Math.cos(angle) *
+        speed;
+
+    pooVY =
+        Math.sin(angle) *
+        speed;
+}
+
+/* =========================================================
+   CARD COLLISION
+========================================================= */
+
+function getRect(el) {
+    return el.getBoundingClientRect();
+}
+
+function intersects(a, b) {
+    return !(
+        a.right < b.left ||
+        a.left > b.right ||
+        a.bottom < b.top ||
+        a.top > b.bottom
+    );
+}
+
+function bounceFromRect(rect) {
+    const pooRect = {
+        left: pooX,
+        right: pooX + pooWidth,
+        top: pooY,
+        bottom: pooY + pooHeight
+    };
+
+    if (!intersects(pooRect, rect)) {
+        return false;
+    }
+
+    const overlapLeft =
+        pooRect.right - rect.left;
+
+    const overlapRight =
+        rect.right - pooRect.left;
+
+    const overlapTop =
+        pooRect.bottom - rect.top;
+
+    const overlapBottom =
+        rect.bottom - pooRect.top;
+
+    const minX =
+        Math.min(
+            overlapLeft,
+            overlapRight
+        );
+
+    const minY =
+        Math.min(
+            overlapTop,
+            overlapBottom
+        );
+
+    if (minX < minY) {
+        pooVX *= -1;
+
+        if (pooX < rect.left) {
+            pooX =
+                rect.left -
+                pooWidth -
+                2;
+        } else {
+            pooX =
+                rect.right + 2;
+        }
+
+        pooSquash = 1;
+    } else {
+        pooVY *= -1;
+
+        if (pooY < rect.top) {
+            pooY =
+                rect.top -
+                pooHeight -
+                2;
+        } else {
+            pooY =
+                rect.bottom + 2;
+        }
+
+        pooSquash = 1;
+    }
+
+    return true;
+}
+
+/* =========================================================
+   POO COLLISION WITH CURSOR
+========================================================= */
+
+function checkCursorCollision() {
+    if (!mouse.active) return;
+
+    const centerX =
+        pooX + pooWidth / 2;
+
+    const centerY =
+        pooY + pooHeight / 2;
+
+    const dx =
+        centerX - mouse.x;
+
+    const dy =
+        centerY - mouse.y;
+
+    const distance =
+        Math.hypot(dx, dy);
+
+    const radius =
+        pooWidth * 0.5;
+
+    if (
+        distance < radius + 12 &&
+        distance > 0
+    ) {
+        const nx =
+            dx / distance;
+
+        const ny =
+            dy / distance;
+
+        const speed =
+            Math.hypot(
+                pooVX,
+                pooVY
+            );
+
+        pooVX =
+            nx *
+            Math.max(
+                speed,
+                2.2
+            );
+
+        pooVY =
+            ny *
+            Math.max(
+                speed,
+                2.2
+            );
+
+        pooX += nx * 6;
+        pooY += ny * 6;
+
+        pooSquash = 1;
+    }
+}
+
+/* =========================================================
+   POO SQUASH
+========================================================= */
+
+function updatePooVisual() {
+    pooSquash *= 0.88;
+
+    const squash =
+        Math.min(
+            pooSquash,
+            1
+        );
+
+    const sx =
+        1 -
+        squash * 0.28;
+
+    const sy =
+        1 +
+        squash * 0.18;
+
+    poo.style.transform =
+        `scale(${sx * pooScale}, ${sy * pooScale})`;
+}
+
+/* =========================================================
+   POO LOOP
+========================================================= */
+
+function pooLoop() {
+    if (
+        !eventTriggered
+    ) {
+        pooX += pooVX;
+        pooY += pooVY;
+
+        /*
+            Столкновение с краями.
+        */
+
+        if (pooX <= 0) {
+            pooX = 0;
+            pooVX = Math.abs(pooVX);
+            pooSquash = 1;
+        }
+
+        if (
+            pooX + pooWidth >= w
+        ) {
+            pooX =
+                w - pooWidth;
+
+            pooVX =
+                -Math.abs(pooVX);
+
+            pooSquash = 1;
+        }
+
+        if (pooY <= 0) {
+            pooY = 0;
+            pooVY = Math.abs(pooVY);
+            pooSquash = 1;
+        }
+
+        /*
+            ВАЖНО:
+            именно угол запускает событие.
+        */
+
+        const touchingLeft =
+            pooX <= 2;
+
+        const touchingRight =
+            pooX + pooWidth >=
+            w - 2;
+
+        const touchingTop =
+            pooY <= 2;
+
+        const touchingBottom =
+            pooY + pooHeight >=
+            h - 2;
+
+        const corner =
+            (
+                touchingLeft ||
+                touchingRight
+            ) &&
+            (
+                touchingTop ||
+                touchingBottom
+            );
+
+        if (corner) {
+            triggerOgsculeEvent();
+        }
+
+        /*
+            Нижняя граница.
+        */
+
+        if (
+            pooY + pooHeight >= h
+        ) {
+            pooY =
+                h - pooHeight;
+
+            pooVY =
+                -Math.abs(pooVY);
+
+            pooSquash = 1;
+        }
+
+        /*
+            Карточки.
+        */
+
+        if (!eventTriggered) {
+            for (const card of cards) {
+                bounceFromRect(
+                    getRect(card)
+                );
+            }
+
+            const profile =
+                document.querySelector(
+                    ".profile"
+                );
+
+            if (profile) {
+                bounceFromRect(
+                    getRect(profile)
+                );
+            }
+
+            checkCursorCollision();
+        }
+
+        poo.style.left =
+            `${pooX}px`;
+
+        poo.style.top =
+            `${pooY}px`;
+
+        updatePooVisual();
+    }
+
+    requestAnimationFrame(
+        pooLoop
+    );
+}
+
+/* =========================================================
+   OGSCULE
+========================================================= */
+
+let ogscule =
     document.createElement("img");
 
-ogscule.id =
-    "ogscule";
+ogscule.id = "ogscule";
 
 ogscule.src =
     "assets/ogscule.png";
 
 ogscule.alt = "";
 
-ogscule.draggable = false;
-
-ogscule.setAttribute(
-    "aria-hidden",
-    "true"
-);
-
 document.body.appendChild(
     ogscule
 );
 
+function triggerOgsculeEvent() {
+    if (eventTriggered) return;
 
-/* =========================================
-   POO PHYSICS
-   ========================================= */
-
-const ball = {
-
-    x: 200,
-    y: 200,
-
-    size: 72,
-
-    vx: 2.4,
-    vy: 1.8,
-
-    rotation: 0,
-
-    rotationSpeed: 0.7,
-
-    scaleX: 1,
-    scaleY: 1,
-
-    targetScaleX: 1,
-    targetScaleY: 1
-};
-
-
-function resetPooPosition() {
-
-    ball.size =
-        window.innerWidth <= 760
-            ? 58
-            : 72;
-
-    ball.x =
-        w * 0.5 -
-        ball.size / 2;
-
-    ball.y =
-        h * 0.25;
-
-    ball.vx =
-        (
-            Math.random() > 0.5
-                ? 1
-                : -1
-        ) * 2.2;
-
-    ball.vy =
-        (
-            Math.random() > 0.5
-                ? 1
-                : -1
-        ) * 1.7;
-}
-
-
-function squashX() {
-
-    ball.scaleX = 0.58;
-    ball.scaleY = 1.15;
-
-    ball.targetScaleX = 1;
-    ball.targetScaleY = 1;
-}
-
-
-function squashY() {
-
-    ball.scaleX = 1.15;
-    ball.scaleY = 0.58;
-
-    ball.targetScaleX = 1;
-    ball.targetScaleY = 1;
-}
-
-
-/* =========================================
-   SCREEN COLLISION
-   ========================================= */
-
-function screenCollision() {
-
-    let hitX = false;
-    let hitY = false;
-
-    if (
-        ball.x <= 0 &&
-        ball.vx < 0
-    ) {
-
-        ball.x = 0;
-
-        ball.vx =
-            Math.abs(
-                ball.vx
-            );
-
-        hitX = true;
-    }
-
-    if (
-        ball.x +
-        ball.size >= w &&
-        ball.vx > 0
-    ) {
-
-        ball.x =
-            w -
-            ball.size;
-
-        ball.vx =
-            -Math.abs(
-                ball.vx
-            );
-
-        hitX = true;
-    }
-
-    if (
-        ball.y <= 0 &&
-        ball.vy < 0
-    ) {
-
-        ball.y = 0;
-
-        ball.vy =
-            Math.abs(
-                ball.vy
-            );
-
-        hitY = true;
-    }
-
-    if (
-        ball.y +
-        ball.size >= h &&
-        ball.vy > 0
-    ) {
-
-        ball.y =
-            h -
-            ball.size;
-
-        ball.vy =
-            -Math.abs(
-                ball.vy
-            );
-
-        hitY = true;
-    }
-
-    if (
-        hitX &&
-        hitY
-    ) {
-
-        triggerFinalSequence();
-    }
-
-    if (hitX)
-        squashX();
-
-    if (hitY)
-        squashY();
-}
-
-
-/* =========================================
-   RECTANGLE COLLISION
-   ========================================= */
-
-function rectangleCollision(rect) {
-
-    if (
-        finalSequence.started
-    ) {
-        return;
-    }
-
-    const left =
-        ball.x;
-
-    const right =
-        ball.x +
-        ball.size;
-
-    const top =
-        ball.y;
-
-    const bottom =
-        ball.y +
-        ball.size;
-
-    const overlapX =
-        Math.min(
-            right,
-            rect.right
-        ) -
-        Math.max(
-            left,
-            rect.left
-        );
-
-    const overlapY =
-        Math.min(
-            bottom,
-            rect.bottom
-        ) -
-        Math.max(
-            top,
-            rect.top
-        );
-
-    if (
-        overlapX <= 0 ||
-        overlapY <= 0
-    ) {
-        return;
-    }
-
-    const centerX =
-        ball.x +
-        ball.size / 2;
-
-    const centerY =
-        ball.y +
-        ball.size / 2;
-
-    const rectCenterX =
-        rect.left +
-        rect.width / 2;
-
-    const rectCenterY =
-        rect.top +
-        rect.height / 2;
-
-    const dx =
-        centerX -
-        rectCenterX;
-
-    const dy =
-        centerY -
-        rectCenterY;
-
-    if (
-        overlapX <
-        overlapY
-    ) {
-
-        if (dx < 0) {
-
-            ball.x =
-                rect.left -
-                ball.size;
-
-            ball.vx =
-                -Math.abs(
-                    ball.vx
-                );
-
-        } else {
-
-            ball.x =
-                rect.right;
-
-            ball.vx =
-                Math.abs(
-                    ball.vx
-                );
-        }
-
-        squashX();
-
-    } else {
-
-        if (dy < 0) {
-
-            ball.y =
-                rect.top -
-                ball.size;
-
-            ball.vy =
-                -Math.abs(
-                    ball.vy
-                );
-
-        } else {
-
-            ball.y =
-                rect.bottom;
-
-            ball.vy =
-                Math.abs(
-                    ball.vy
-                );
-        }
-
-        squashY();
-    }
-}
-
-
-/* =========================================
-   CURSOR COLLISION
-   ========================================= */
-
-function cursorCollision() {
-
-    if (
-        finalSequence.started
-    ) {
-        return;
-    }
-
-    if (!mouse.active)
-        return;
-
-    const centerX =
-        ball.x +
-        ball.size / 2;
-
-    const centerY =
-        ball.y +
-        ball.size / 2;
-
-    const dx =
-        centerX -
-        mouse.x;
-
-    const dy =
-        centerY -
-        mouse.y;
-
-    const distance =
-        Math.hypot(
-            dx,
-            dy
-        );
-
-    const radius =
-        ball.size * 0.5 +
-        18;
-
-    if (
-        distance >= radius
-    ) {
-        return;
-    }
-
-    if (
-        distance === 0
-    ) {
-        return;
-    }
-
-    const nx =
-        dx / distance;
-
-    const ny =
-        dy / distance;
-
-    const push =
-        radius -
-        distance;
-
-    ball.x +=
-        nx * push;
-
-    ball.y +=
-        ny * push;
-
-    const dot =
-        ball.vx * nx +
-        ball.vy * ny;
-
-    if (dot < 0) {
-
-        ball.vx -=
-            2 *
-            dot *
-            nx;
-
-        ball.vy -=
-            2 *
-            dot *
-            ny;
-    }
-
-    if (
-        Math.abs(nx) >
-        Math.abs(ny)
-    ) {
-
-        squashX();
-
-    } else {
-
-        squashY();
-    }
-}
-
-
-/* =========================================
-   FINAL STATE
-   ========================================= */
-
-const finalSequence = {
-
-    started: false,
-
-    cornerX: 0,
-    cornerY: 0,
-
-    cornerSideX: "left",
-    cornerSideY: "top",
-
-    falling: false,
-
-    fallX: 0,
-    fallY: 0,
-
-    fallVelocity: 0,
-
-    groundY: 0
-};
-
-
-/* =========================================
-   OGS CULE -> CENTER
-   ========================================= */
-
-function animateOgsculeToCenter() {
-
-    return new Promise(
-        resolve => {
-
-            const startX =
-                finalSequence.cornerX;
-
-            const startY =
-                finalSequence.cornerY;
-
-            const endX =
-                w / 2;
-
-            const endY =
-                h / 2;
-
-            const start =
-                performance.now();
-
-            const duration =
-                1050;
-
-
-            function animate(time) {
-
-                const progress =
-                    Math.min(
-                        (
-                            time -
-                            start
-                        ) /
-                        duration,
-                        1
-                    );
-
-                const eased =
-                    1 -
-                    Math.pow(
-                        1 - progress,
-                        3
-                    );
-
-                const x =
-                    startX +
-                    (
-                        endX -
-                        startX
-                    ) *
-                    eased;
-
-                const y =
-                    startY +
-                    (
-                        endY -
-                        startY
-                    ) *
-                    eased;
-
-                const scale =
-                    0.15 +
-                    0.85 *
-                    eased;
-
-                const rotation =
-                    -12 +
-                    12 *
-                    eased;
-
-                ogscule.style.left =
-                    `${x}px`;
-
-                ogscule.style.top =
-                    `${y}px`;
-
-                ogscule.style.opacity =
-                    `${Math.min(
-                        1,
-                        progress * 5
-                    )}`;
-
-                ogscule.style.transform =
-                    `
-                    translate(-50%, -50%)
-                    scale(${scale})
-                    rotate(${rotation}deg)
-                    `;
-
-                if (
-                    progress <
-                    1
-                ) {
-
-                    requestAnimationFrame(
-                        animate
-                    );
-
-                } else {
-
-                    resolve();
-                }
-            }
-
-
-            requestAnimationFrame(
-                animate
-            );
-        }
-    );
-}
-
-
-/* =========================================
-   OGS CULE SPRING
-   ========================================= */
-
-function animateOgsculeSpring() {
-
-    return new Promise(
-        resolve => {
-
-            const start =
-                performance.now();
-
-            const duration =
-                900;
-
-
-            function animate(time) {
-
-                const progress =
-                    Math.min(
-                        (
-                            time -
-                            start
-                        ) /
-                        duration,
-                        1
-                    );
-
-                const spring =
-                    Math.exp(
-                        -5 *
-                        progress
-                    ) *
-                    Math.cos(
-                        progress *
-                        Math.PI *
-                        6
-                    );
-
-                const scale =
-                    1 -
-                    spring *
-                    0.42;
-
-                const scaleX =
-                    scale *
-                    (
-                        1 +
-                        Math.sin(
-                            progress *
-                            Math.PI *
-                            8
-                        ) *
-                        0.09
-                    );
-
-                const scaleY =
-                    scale *
-                    (
-                        1 -
-                        Math.sin(
-                            progress *
-                            Math.PI *
-                            8
-                        ) *
-                        0.09
-                    );
-
-                ogscule.style.transform =
-                    `
-                    translate(-50%, -50%)
-                    scale(
-                        ${scaleX},
-                        ${scaleY}
-                    )
-                    rotate(
-                        ${Math.sin(
-                            progress *
-                            Math.PI *
-                            4
-                        ) * 5}deg
-                    )
-                    `;
-
-                if (
-                    progress <
-                    1
-                ) {
-
-                    requestAnimationFrame(
-                        animate
-                    );
-
-                } else {
-
-                    ogscule.style.transform =
-                        `
-                        translate(-50%, -50%)
-                        scale(1)
-                        `;
-
-                    resolve();
-                }
-            }
-
-
-            requestAnimationFrame(
-                animate
-            );
-        }
-    );
-}
-
-
-/* =========================================
-   OGS CULE FALL
-   ========================================= */
-
-function animateOgsculeFall() {
-
-    return new Promise(
-        resolve => {
-
-            const startX =
-                w / 2;
-
-            let y =
-                h / 2;
-
-            let velocity =
-                0;
-
-            const gravity =
-                0.62;
-
-
-            playScreamSound();
-
-
-            function animate() {
-
-                velocity +=
-                    gravity;
-
-                y +=
-                    velocity;
-
-                const rotation =
-                    Math.min(
-                        velocity * 1.8,
-                        35
-                    );
-
-                const scaleX =
-                    1 -
-                    Math.min(
-                        velocity * 0.008,
-                        0.12
-                    );
-
-                const scaleY =
-                    1 +
-                    Math.min(
-                        velocity * 0.012,
-                        0.18
-                    );
-
-
-                ogscule.style.left =
-                    `${startX}px`;
-
-                ogscule.style.top =
-                    `${y}px`;
-
-                ogscule.style.transform =
-                    `
-                    translate(-50%, -50%)
-                    scale(
-                        ${scaleX},
-                        ${scaleY}
-                    )
-                    rotate(${rotation}deg)
-                    `;
-
-
-                if (
-                    y >
-                    h +
-                    ogscule.offsetHeight
-                ) {
-
-                    ogscule.style.opacity =
-                        "0";
-
-                    resolve();
-
-                    return;
-                }
-
-
-                requestAnimationFrame(
-                    animate
-                );
-            }
-
-
-            requestAnimationFrame(
-                animate
-            );
-        }
-    );
-}
-
-
-/* =========================================
-   BURN ELEMENTS
-   ========================================= */
-
-function burnElement(
-    element,
-    delay
-) {
-
-    return new Promise(
-        resolve => {
-
-            setTimeout(
-                () => {
-
-                    element.classList.add(
-                        "burning"
-                    );
-
-                    setTimeout(
-                        resolve,
-                        2400
-                    );
-
-                },
-                delay
-            );
-        }
-    );
-}
-
-
-/* =========================================
-   BURN ALL
-   ========================================= */
-
-async function burnAllCards() {
-
-    /*
-        ВАЖНО:
-        profile находится отдельно
-        от .card, поэтому его тоже
-        добавляем вручную.
-    */
-
-    const allElements = [
-        profile,
-        ...cards
-    ];
-
-
-    /*
-        Запускаем звук сразу,
-        когда начинается огонь.
-    */
-
-    startFireSound();
-
-
-    /*
-        Горение начинается
-        слева направо.
-    */
-
-    allElements.forEach(
-        (element, index) => {
-
-            if (!element)
-                return;
-
-            setTimeout(
-                () => {
-
-                    element.classList.add(
-                        "burning"
-                    );
-
-                },
-                index * 180
-            );
-        }
-    );
-
-
-    /*
-        Ждём пока последний
-        элемент закончит гореть.
-    */
-
-    const totalTime =
-        (
-            allElements.length *
-            180
-        ) +
-        2400;
-
-
-    await new Promise(
-        resolve =>
-            setTimeout(
-                resolve,
-                totalTime
-            )
-    );
-
-
-    /*
-        Плавно выключаем
-        звук огня.
-    */
-
-    stopFireSound();
-}
-
-
-/* =========================================
-   MOVE POO TO CENTER
-   ========================================= */
-
-function movePooToCenter() {
-
-    return new Promise(
-        resolve => {
-
-            const startX =
-                ball.x;
-
-            const startY =
-                ball.y;
-
-            const targetX =
-                w / 2 -
-                ball.size;
-
-            const targetY =
-                h / 2 -
-                ball.size;
-
-            const start =
-                performance.now();
-
-            const duration =
-                650;
-
-
-            function animate(time) {
-
-                const progress =
-                    Math.min(
-                        (
-                            time -
-                            start
-                        ) /
-                        duration,
-                        1
-                    );
-
-                const eased =
-                    1 -
-                    Math.pow(
-                        1 - progress,
-                        3
-                    );
-
-                ball.x =
-                    startX +
-                    (
-                        targetX -
-                        startX
-                    ) *
-                    eased;
-
-                ball.y =
-                    startY +
-                    (
-                        targetY -
-                        startY
-                    ) *
-                    eased;
-
-                poo.style.left =
-                    `${ball.x}px`;
-
-                poo.style.top =
-                    `${ball.y}px`;
-
-                poo.style.transform =
-                    `
-                    rotate(0deg)
-                    scale(
-                        ${1 + eased},
-                        ${1 + eased}
-                    )
-                    `;
-
-
-                if (
-                    progress <
-                    1
-                ) {
-
-                    requestAnimationFrame(
-                        animate
-                    );
-
-                } else {
-
-                    resolve();
-                }
-            }
-
-
-            requestAnimationFrame(
-                animate
-            );
-        }
-    );
-}
-
-
-/* =========================================
-   POO FINAL FALL
-   ========================================= */
-
-function fallPoo() {
-
-    return new Promise(
-        resolve => {
-
-            finalSequence.falling =
-                true;
-
-
-            const enlargedSize =
-                ball.size * 2;
-
-
-            finalSequence.fallX =
-                w / 2 -
-                enlargedSize / 2;
-
-
-            finalSequence.fallY =
-                -enlargedSize;
-
-
-            finalSequence.groundY =
-                h -
-                enlargedSize -
-                18;
-
-
-            finalSequence.fallVelocity =
-                0;
-
-
-            const gravity =
-                0.48;
-
-
-            function animate() {
-
-                finalSequence.fallVelocity +=
-                    gravity;
-
-                finalSequence.fallY +=
-                    finalSequence.fallVelocity;
-
-
-                /*
-                    Никакого вращения.
-                    Падает строго вертикально.
-                */
-
-                poo.style.left =
-                    `${finalSequence.fallX}px`;
-
-                poo.style.top =
-                    `${finalSequence.fallY}px`;
-
-                poo.style.transform =
-                    `
-                    rotate(0deg)
-                    scale(2, 2)
-                    `;
-
-
-                if (
-                    finalSequence.fallY >=
-                    finalSequence.groundY
-                ) {
-
-                    finalSequence.fallY =
-                        finalSequence.groundY;
-
-
-                    poo.style.left =
-                        `${finalSequence.fallX}px`;
-
-                    poo.style.top =
-                        `${finalSequence.fallY}px`;
-
-
-                    /*
-                        Небольшое сжатие
-                        при ударе о пол.
-                    */
-
-                    poo.style.transform =
-                        `
-                        rotate(0deg)
-                        scale(
-                            2.16,
-                            1.82
-                        )
-                        `;
-
-
-                    setTimeout(
-                        () => {
-
-                            /*
-                                Возвращаем ровную
-                                форму.
-                            */
-
-                            poo.style.transform =
-                                `
-                                rotate(0deg)
-                                scale(2, 2)
-                                `;
-
-
-                            /*
-                                Фиксируем позицию.
-                            */
-
-                            finalSequence.fallY =
-                                finalSequence.groundY;
-
-
-                            poo.style.top =
-                                `${finalSequence.groundY}px`;
-
-
-                            resolve();
-
-                        },
-                        180
-                    );
-
-                    return;
-                }
-
-
-                requestAnimationFrame(
-                    animate
-                );
-            }
-
-
-            requestAnimationFrame(
-                animate
-            );
-        }
-    );
-}
-
-
-/* =========================================
-   FINAL SEQUENCE
-   ========================================= */
-
-async function triggerFinalSequence() {
-
-    if (
-        finalSequence.started
-    ) {
-        return;
-    }
-
-
-    finalSequence.started =
-        true;
-
-
-    stopAvatarColorCycle();
-    stopMobileCards();
-
-
-    /*
-        Пытаемся разблокировать
-        аудио перед началом.
-    */
-
-    getAudioContext();
-
-
-    /*
-        Определяем угол.
-    */
-
-    const hitLeft =
-        ball.x <
-        w / 2;
-
-    const hitTop =
-        ball.y <
-        h / 2;
-
-
-    finalSequence.cornerX =
-        hitLeft
-            ? 0
-            : w;
-
-    finalSequence.cornerY =
-        hitTop
-            ? 0
-            : h;
-
-
-    /*
-        Poo исчезает на время
-        появления OGScule.
-    */
-
-    poo.style.opacity =
-        "0";
-
-
-    ogscule.style.left =
-        `${finalSequence.cornerX}px`;
-
-    ogscule.style.top =
-        `${finalSequence.cornerY}px`;
-
-    ogscule.style.opacity =
-        "0";
-
-
-    /*
-        Угол -> центр.
-    */
-
-    await animateOgsculeToCenter();
-
-
-    /*
-        Пружина.
-    */
+    eventTriggered = true;
 
     playSpringSound();
 
-    await animateOgsculeSpring();
-
-
     /*
-        Падение + крик.
+        Фиксируем угол,
+        из которого появляется ogscule.
     */
 
-    await animateOgsculeFall();
+    const fromRight =
+        pooX >
+        w / 2;
 
+    const fromBottom =
+        pooY >
+        h / 2;
 
-    /*
-        ОГРОМНЫЙ момент:
-        после ухода OGScule
-        начинается настоящее
-        горение.
-    */
+    const startX =
+        fromRight
+            ? w - 40
+            : 40;
 
-    await burnAllCards();
+    const startY =
+        fromBottom
+            ? h - 40
+            : 40;
 
+    ogscule.style.left =
+        `${startX}px`;
 
-    /*
-        Возвращаем poo.
-    */
+    ogscule.style.top =
+        `${startY}px`;
 
-    poo.style.opacity =
-        "1";
-
-
-    /*
-        Сначала ставим его
-        в центр.
-    */
-
-    await movePooToCenter();
-
+    ogscule.style.opacity = "1";
 
     /*
-        Затем он падает
-        вертикально вниз.
+        Появление из угла,
+        движение к центру,
+        увеличение.
     */
 
-    await fallPoo();
+    const animation =
+        ogscule.animate(
+            [
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.15)"
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.65)",
+                    offset: 0.55
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1.12)",
+                    offset: 0.78
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(0.92)",
+                    offset: 0.88
+                },
+
+                {
+                    transform:
+                        "translate(-50%, -50%) scale(1)"
+                }
+            ],
+            {
+                duration: 1600,
+                easing:
+                    "cubic-bezier(.22,1.35,.45,1)",
+                fill: "forwards"
+            }
+        );
+
+    animation.onfinish =
+        () => {
+            playSpringSound();
+
+            /*
+                Короткая пружина в центре.
+            */
+
+            const spring =
+                ogscule.animate(
+                    [
+                        {
+                            transform:
+                                "translate(-50%, -50%) scale(1)"
+                        },
+
+                        {
+                            transform:
+                                "translate(-50%, -50%) scale(1.18, .82)"
+                        },
+
+                        {
+                            transform:
+                                "translate(-50%, -50%) scale(.88, 1.12)"
+                        },
+
+                        {
+                            transform:
+                                "translate(-50%, -50%) scale(1.06, .94)"
+                        },
+
+                        {
+                            transform:
+                                "translate(-50%, -50%) scale(1)"
+                        }
+                    ],
+                    {
+                        duration: 800,
+                        easing:
+                            "cubic-bezier(.2,1.5,.4,1)"
+                    }
+                );
+
+            spring.onfinish =
+                () => {
+                    playScreamSound();
+
+                    /*
+                        После пружины
+                        картинка проваливается вниз.
+                    */
+
+                    const fall =
+                        ogscule.animate(
+                            [
+                                {
+                                    transform:
+                                        "translate(-50%, -50%) scale(1)",
+                                    opacity: 1
+                                },
+
+                                {
+                                    transform:
+                                        "translate(-50%, -20%) scale(1.05)",
+                                    opacity: 1,
+                                    offset: 0.15
+                                },
+
+                                {
+                                    transform:
+                                        "translate(-50%, 120vh) scale(0.9)",
+                                    opacity: 0
+                                }
+                            ],
+                            {
+                                duration: 1200,
+                                easing:
+                                    "cubic-bezier(.65,0,1,1)",
+                                fill: "forwards"
+                            }
+                        );
+
+                    fall.onfinish =
+                        () => {
+                            startBurning();
+                        };
+                };
+        };
 }
 
+/* =========================================================
+   FIRE
+========================================================= */
 
-/* =========================================
-   POO ANIMATION
-   ========================================= */
-
-let previousTime =
-    performance.now();
-
-
-function animatePoo(time) {
-
-    if (
-        finalSequence.started
-    ) {
-
-        requestAnimationFrame(
-            animatePoo
+function createFireAt(
+    x,
+    y,
+    width,
+    height
+) {
+    const layer =
+        document.createElement(
+            "div"
         );
 
-        return;
+    layer.className =
+        "fire-layer";
+
+    layer.style.left =
+        `${x}px`;
+
+    layer.style.top =
+        `${y}px`;
+
+    layer.style.width =
+        `${width}px`;
+
+    layer.style.height =
+        `${height}px`;
+
+    document.body.appendChild(
+        layer
+    );
+
+    /*
+        Много разных языков пламени.
+    */
+
+    const fireCount =
+        Math.max(
+            8,
+            Math.floor(
+                width / 16
+            )
+        );
+
+    for (
+        let i = 0;
+        i < fireCount;
+        i++
+    ) {
+        const flame =
+            document.createElement(
+                "div"
+            );
+
+        flame.className =
+            "fire";
+
+        const size =
+            13 +
+            Math.random() * 24;
+
+        flame.style.width =
+            `${size}px`;
+
+        flame.style.height =
+            `${30 + Math.random() * 45}px`;
+
+        flame.style.left =
+            `${Math.random() * width}px`;
+
+        flame.style.bottom =
+            `${Math.random() * 5}px`;
+
+        flame.style.setProperty(
+            "--duration",
+            `${0.28 + Math.random() * 0.45}s`
+        );
+
+        flame.style.setProperty(
+            "--rotation",
+            `${-15 + Math.random() * 30}deg`
+        );
+
+        flame.style.setProperty(
+            "--scale",
+            `${0.75 + Math.random() * 0.5}`
+        );
+
+        layer.appendChild(
+            flame
+        );
     }
 
+    /*
+        Дым.
+    */
 
-    const delta =
-        Math.min(
-            (
-                time -
-                previousTime
-            ) /
-            16.6667,
-            2
+    const smokeInterval =
+        setInterval(() => {
+            if (
+                !document.body.contains(
+                    layer
+                )
+            ) {
+                clearInterval(
+                    smokeInterval
+                );
+                return;
+            }
+
+            const smoke =
+                document.createElement(
+                    "div"
+                );
+
+            smoke.className =
+                "smoke";
+
+            smoke.style.left =
+                `${Math.random() * width}px`;
+
+            smoke.style.bottom =
+                `${height * 0.5}px`;
+
+            smoke.style.setProperty(
+                "--sx",
+                `${-30 + Math.random() * 60}px`
+            );
+
+            layer.appendChild(
+                smoke
+            );
+
+            setTimeout(
+                () =>
+                    smoke.remove(),
+                2600
+            );
+        },
+        240
         );
 
+    /*
+        Искры.
+    */
 
-    previousTime =
-        time;
+    const emberInterval =
+        setInterval(() => {
+            if (
+                !document.body.contains(
+                    layer
+                )
+            ) {
+                clearInterval(
+                    emberInterval
+                );
+                return;
+            }
 
+            const ember =
+                document.createElement(
+                    "div"
+                );
 
-    ball.x +=
-        ball.vx *
-        delta;
+            ember.className =
+                "ember";
 
-    ball.y +=
-        ball.vy *
-        delta;
+            ember.style.left =
+                `${Math.random() * width}px`;
 
+            ember.style.bottom =
+                `${Math.random() * height * 0.7}px`;
 
-    screenCollision();
+            ember.style.setProperty(
+                "--ex",
+                `${-35 + Math.random() * 70}px`
+            );
 
+            ember.style.setProperty(
+                "--ey",
+                `${-30 - Math.random() * 80}px`
+            );
+
+            layer.appendChild(
+                ember
+            );
+
+            setTimeout(
+                () =>
+                    ember.remove(),
+                900
+            );
+        },
+        110
+        );
+
+    return {
+        layer,
+        smokeInterval,
+        emberInterval
+    };
+}
+
+/* =========================================================
+   BURN ALL
+========================================================= */
+
+function startBurning() {
+    startFireSound();
+
+    /*
+        Все плашки + левая.
+    */
 
     const elements = [
-        profile,
-        ...cards
-    ];
-
-
-    elements
-        .filter(Boolean)
-        .forEach(element => {
-
-            rectangleCollision(
-                element.getBoundingClientRect()
-            );
-        });
-
-
-    cursorCollision();
-
-
-    ball.scaleX +=
-        (
-            ball.targetScaleX -
-            ball.scaleX
-        ) *
-        0.06 *
-        delta;
-
-
-    ball.scaleY +=
-        (
-            ball.targetScaleY -
-            ball.scaleY
-        ) *
-        0.06 *
-        delta;
-
-
-    ball.rotation +=
-        ball.rotationSpeed *
-        delta;
-
-
-    poo.style.left =
-        `${ball.x}px`;
-
-    poo.style.top =
-        `${ball.y}px`;
-
-    poo.style.transform =
-        `
-        rotate(${ball.rotation}deg)
-        scale(
-            ${ball.scaleX},
-            ${ball.scaleY}
+        ...cards,
+        document.querySelector(
+            ".profile"
         )
-        `;
+    ].filter(Boolean);
 
+    /*
+        Горение начинается
+        с небольшой разницей по времени,
+        чтобы всё не исчезало одновременно.
+    */
 
-    requestAnimationFrame(
-        animatePoo
+    elements.forEach(
+        (element, index) => {
+            const rect =
+                element.getBoundingClientRect();
+
+            setTimeout(
+                () => {
+                    element.classList.add(
+                        "burning"
+                    );
+
+                    const fire =
+                        createFireAt(
+                            rect.left - 15,
+                            rect.top +
+                                rect.height * 0.25,
+                            rect.width + 30,
+                            rect.height * 0.8
+                        );
+
+                    /*
+                        Пламя держится чуть дольше
+                        самой карточки.
+                    */
+
+                    setTimeout(
+                        () => {
+                            clearInterval(
+                                fire.smokeInterval
+                            );
+
+                            clearInterval(
+                                fire.emberInterval
+                            );
+
+                            fire.layer.animate(
+                                [
+                                    {
+                                        opacity: 1
+                                    },
+                                    {
+                                        opacity: 0
+                                    }
+                                ],
+                                {
+                                    duration: 1200,
+                                    fill: "forwards"
+                                }
+                            );
+
+                            setTimeout(
+                                () =>
+                                    fire.layer.remove(),
+                                1300
+                            );
+                        },
+                        3000
+                    );
+                },
+                index * 170
+            );
+        }
+    );
+
+    /*
+        Через несколько секунд
+        постепенно прекращаем звук.
+    */
+
+    setTimeout(
+        () => {
+            stopFireSound();
+        },
+        6500
     );
 }
 
-
-/* =========================================
-   LOAD
-   ========================================= */
-
-poo.addEventListener(
-    "load",
-    () => {
-
-        resetPooPosition();
-
-        poo.style.display =
-            "block";
-    }
-);
-
-
-poo.addEventListener(
-    "error",
-    () => {
-
-        console.error(
-            "Не удалось загрузить assets/poo.png"
-        );
-    }
-);
-
-
-ogscule.addEventListener(
-    "error",
-    () => {
-
-        console.error(
-            "Не удалось загрузить assets/ogscule.png"
-        );
-    }
-);
-
-
-/* =========================================
-   RESIZE
-   ========================================= */
+/* =========================================================
+   START
+========================================================= */
 
 window.addEventListener(
     "resize",
-    () => {
-
-        if (
-            finalSequence.started
-        ) {
-            return;
-        }
-
-        resize();
-
-        resetPooPosition();
-
-
-        if (
-            window.innerWidth <= 760
-        ) {
-
-            startMobileCards();
-
-        } else {
-
-            stopMobileCards();
-
-            startAvatarColorCycle();
-        }
-    }
+    resize
 );
 
-
-/* =========================================
-   START
-   ========================================= */
+window.addEventListener(
+    "pointerdown",
+    initAudio,
+    { once: true }
+);
 
 resize();
 
+resetPooPosition();
+
+poo.style.left =
+    `${pooX}px`;
+
+poo.style.top =
+    `${pooY}px`;
+
+pooLoop();
+
 frame();
-
-colorLoop();
-
-startAvatarColorCycle();
-
-startMobileCards();
-
-requestAnimationFrame(
-    animatePoo
-);
