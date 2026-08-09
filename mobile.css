@@ -29,6 +29,10 @@ main{
   padding:28px 0 20px;
 }
 
+/* =========================================================
+   GLASS
+========================================================= */
+
 .profile,
 .card{
   background:rgba(17,17,24,.62);
@@ -39,6 +43,10 @@ main{
   backdrop-filter:blur(18px);
   -webkit-backdrop-filter:blur(18px);
 }
+
+/* =========================================================
+   PROFILE
+========================================================= */
 
 .profile{
   border-radius:28px;
@@ -54,16 +62,11 @@ main{
   height:104px;
   padding:4px;
   border-radius:50%;
-  background:conic-gradient(
-    from 0deg,
-    var(--accent),
-    #22d3ee,
-    #1ed760,
-    #ff0050,
-    var(--accent)
-  );
+  background:var(--accent);
   box-shadow:0 0 28px color-mix(in srgb,var(--accent) 42%,transparent);
-  transition:background 1.2s ease, box-shadow 1.2s ease;
+  transition:
+    background 1.4s ease,
+    box-shadow 1.4s ease;
 }
 
 .avatar img{
@@ -83,6 +86,10 @@ main{
 .handle{
   color:#aaaab6;
 }
+
+/* =========================================================
+   LINKS
+========================================================= */
 
 .links{
   display:flex;
@@ -104,36 +111,41 @@ main{
   overflow:hidden;
   transition:
     transform .24s ease,
-    border-color .45s ease,
-    box-shadow .45s ease;
+    border-color .6s ease,
+    box-shadow .6s ease;
 }
 
+/* Подсветка своего цвета */
 .card::before{
   content:'';
   position:absolute;
-  width:220px;
-  height:220px;
-  left:-110px;
+  width:240px;
+  height:240px;
+  left:-120px;
   top:50%;
   transform:translateY(-50%);
   background:radial-gradient(
     circle,
-    color-mix(in srgb,var(--link-color) 24%,transparent) 0%,
-    color-mix(in srgb,var(--link-color) 12%,transparent) 34%,
-    transparent 72%
+    color-mix(in srgb,var(--link-color) 30%,transparent) 0%,
+    color-mix(in srgb,var(--link-color) 16%,transparent) 36%,
+    transparent 74%
   );
-  opacity:.45;
-  transition:left .7s ease, opacity .4s ease;
+  opacity:.25;
+  transition:
+    left .9s ease,
+    opacity .5s ease;
 }
 
 .card.active::before{
-  left:calc(100% - 110px);
-  opacity:.95;
+  left:calc(100% - 120px);
+  opacity:1;
 }
 
 .card.active{
-  border-color:color-mix(in srgb,var(--link-color) 62%,white 10%);
-  box-shadow:0 14px 36px color-mix(in srgb,var(--link-color) 18%,transparent);
+  border-color:color-mix(in srgb,var(--link-color) 72%,white 8%);
+  box-shadow:
+    0 16px 42px color-mix(in srgb,var(--link-color) 22%,transparent),
+    inset 0 1px rgba(255,255,255,.05);
 }
 
 .card img{
@@ -150,11 +162,15 @@ main{
   font-weight:650;
 }
 
+/* =========================================================
+   FOOTER
+========================================================= */
+
 .footer-note{
   text-align:center;
-  color:#b8b8c6;
+  color:#c3c3cf;
   font-size:12px;
   letter-spacing:.02em;
-  opacity:.9;
-  padding:8px 0 2px;
+  opacity:.92;
+  padding:10px 0 2px;
 }
