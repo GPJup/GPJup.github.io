@@ -525,7 +525,15 @@ let cycleIndex = 0;
 let cycleInterval = null;
 let hovered = false;
 
-function startAvatarCycle(){
+function applyCycleColor() {
+
+    document.documentElement.style.setProperty(
+        '--accent',
+        cycleColors[cycleIndex]
+    );
+}
+
+function startAvatarCycle() {
 
     clearInterval(cycleInterval);
 
@@ -536,69 +544,76 @@ function startAvatarCycle(){
         cycleIndex =
             (cycleIndex + 1) % cycleColors.length;
 
-        document.documentElement.style.setProperty(
-            '--accent',
-            cycleColors[cycleIndex]
-        );
+        applyCycleColor();
 
     }, 2200);
 }
 
-// стартуем цикл
+// первый цвет сразу
+applyCycleColor();
+
+// запуск цикла
 startAvatarCycle();
 
 cards.forEach(card => {
 
     const color =
-        card.dataset.color ||
-        "#8b5cf6";
-
+        card.dataset.color || '#8b5cf6';
 
     card.style.setProperty(
-        "--link-color",
+        '--link-color',
         color
     );
 
-
-   card.addEventListener(
-    'pointerenter',
-    () => {
-
-        hovered = true;
-
-        const c = card.dataset.color;
-
-        const idx =
-            cycleColors.indexOf(c);
-
-        if (idx !== -1) {
-            cycleIndex = idx;
-        }
-
-        document.documentElement.style.setProperty(
-            '--accent',
-            c
-        );
-    }
-);
     card.addEventListener(
-        "pointermove",
+        'pointerenter',
+        () => {
+
+            hovered = true;
+
+            const idx =
+                cycleColors.indexOf(color);
+
+            if (idx !== -1) {
+                cycleIndex = idx;
+            }
+
+            document.documentElement.style.setProperty(
+                '--accent',
+                color
+            );
+        }
+    );
+
+    card.addEventListener(
+        'pointermove',
         event => {
 
             const rect =
                 card.getBoundingClientRect();
 
-
             card.style.setProperty(
-                "--mx",
+                '--mx',
                 `${event.clientX - rect.left}px`
             );
 
-
             card.style.setProperty(
-                "--my",
+                '--my',
                 `${event.clientY - rect.top}px`
             );
+        }
+    );
+
+    card.addEventListener(
+        'pointerleave',
+        () => {
+
+            hovered = false;
+
+            cycleIndex =
+                (cycleIndex + 1) % cycleColors.length;
+
+            applyCycleColor();
         }
     );
 });
@@ -2060,8 +2075,8 @@ poo.style.left =
 poo.style.top =
     `${pooY}px`;
 
-// запускаем частицы
+// частицы / звёзды
 particleFrame();
 
-// запускаем poo
+// poo
 pooLoop();
