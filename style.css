@@ -456,31 +456,34 @@ main{
 }
 
 /* =========================================================
-   SETTINGS
+   SETTINGS PANEL
 ========================================================= */
 
 .settings-overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.45);
-  backdrop-filter:blur(12px);
+  backdrop-filter:blur(14px);
   z-index:2000;
   display:flex;
   align-items:center;
   justify-content:center;
+  opacity:1;
+  transition:opacity .25s ease;
 }
 
 .settings-overlay.hidden{
-  display:none;
+  opacity:0;
+  pointer-events:none;
 }
 
 .settings-panel{
   width:min(420px,calc(100% - 32px));
-  background:rgba(17,17,24,.72);
+  background:rgba(17,17,24,.78);
   border:1px solid rgba(255,255,255,.12);
   border-radius:28px;
   padding:22px;
-  box-shadow:0 28px 80px rgba(0,0,0,.45);
+  box-shadow:0 28px 80px rgba(0,0,0,.48);
   backdrop-filter:blur(22px);
 }
 
