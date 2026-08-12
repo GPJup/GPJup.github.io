@@ -2163,3 +2163,28 @@ soundVolume.addEventListener('input', () => {
         soundVol
     );
 });
+
+/* =========================================================
+   SETTINGS PANEL
+========================================================= */
+
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const closeSettings = document.getElementById('closeSettings');
+
+if (settingsBtn && settingsOverlay && closeSettings) {
+
+    settingsBtn.addEventListener('click', () => {
+        settingsOverlay.classList.remove('hidden');
+    });
+
+    closeSettings.addEventListener('click', () => {
+        settingsOverlay.classList.add('hidden');
+    });
+
+    settingsOverlay.addEventListener('click', e => {
+        if (e.target === settingsOverlay) {
+            settingsOverlay.classList.add('hidden');
+        }
+    });
+}
