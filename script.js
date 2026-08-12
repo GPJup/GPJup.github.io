@@ -119,28 +119,8 @@ Object.values(sounds).forEach(audio => {
 
 let audioUnlocked = false;
 
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsOverlay = document.getElementById('settingsOverlay');
-const closeSettings = document.getElementById('closeSettings');
-
 const musicVolume = document.getElementById('musicVolume');
 const soundVolume = document.getElementById('soundVolume');
-
-let pausedBySettings = false;
-let savedMusicState = false;
-let savedCycleState = false;
-let cyclePaused = false;
-
-let musicVol =
-    Number(localStorage.getItem('musicVolume') || 45);
-
-let soundVol =
-    Number(localStorage.getItem('soundVolume') || 100);
-
-musicVolume.value = musicVol;
-soundVolume.value = soundVol;
-
-music.volume = musicVol / 100;
 
 /*
     Браузеры иногда запрещают звук,
