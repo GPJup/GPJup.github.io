@@ -773,110 +773,61 @@ function resetPoo() {
    POO VS RECTANGLE
 ========================================================= */
 
-function bouncePooFromRect(
-    rect
-) {
+function bouncePooFromRect(rect) {
 
-    if (eventStarted) {
+    if (eventStarted || pooFinalAnimation) {
         return;
     }
 
+    const left   = pooX;
+    const right  = pooX + pooSize;
+    const top    = pooY;
+    const bottom = pooY + pooSize;
 
-    const left =
-        pooX;
-
-    const right =
-        pooX + pooSize;
-
-    const top =
-        pooY;
-
-    const bottom =
-        pooY + pooSize;
-
-
+    // Нет пересечения
     if (
-        right < rect.left ||
-        left > rect.right ||
-        bottom < rect.top ||
-        top > rect.bottom
+        right <= rect.left ||
+        left >= rect.right ||
+        bottom <= rect.top ||
+        top >= rect.bottom
     ) {
         return;
     }
 
+    // Глубина проникновения
+    const overlapLeft   = right - rect.left;
+    const overlapRight  = rect.right - left;
+    const overlapTop    = bottom - rect.top;
+    const overlapBottom = rect.bottom - top;
 
-    const fromLeft =
-        right - rect.left;
+    const minOverlap = Math.min(
+        overlapLeft,
+        overlapRight,
+        overlapTop,
+        overlapBottom
+    );
 
-    const fromRight =
-        rect.right - left;
+    // Отталкиваем наружу с небольшим зазором
+    if (minOverlap === overlapLeft) {
 
-    const fromTop =
-        bottom - rect.top;
+        pooX = rect.left - pooSize - 1;
+        pooVX = -Math.abs(pooVX);
 
-    const fromBottom =
-        rect.bottom - top;
+    } else if (minOverlap === overlapRight) {
 
+        pooX = rect.right + 1;
+        pooVX = Math.abs(pooVX);
 
-    const horizontal =
-        Math.min(
-            fromLeft,
-            fromRight
-        );
+    } else if (minOverlap === overlapTop) {
 
-    const vertical =
-        Math.min(
-            fromTop,
-            fromBottom
-        );Btn
-
-
-    if (
-        horizontal <
-        vertical
-    ) {
-
-        pooVX *= -1;
-
-        if (
-            left <
-            rect.left
-        ) {
-
-            pooX =
-                rect.left -
-                pooSize -
-                2;
-
-        } else {
-
-            pooX =
-                rect.right +
-                2;
-        }
+        pooY = rect.top - pooSize - 1;
+        pooVY = -Math.abs(pooVY);
 
     } else {
 
-        pooVY *= -1;
-
-        if (
-            top <
-            rect.top
-        ) {
-
-            pooY =
-                rect.top -
-                pooSize -
-                2;
-
-        } else {
-
-            pooY =
-                rect.bottom +
-                2;
-        }
+        pooY = rect.bottom + 1;
+        pooVY = Math.abs(pooVY);
     }
-
 
     pooSquash = 1;
 }
