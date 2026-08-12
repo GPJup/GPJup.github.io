@@ -119,6 +119,28 @@ Object.values(sounds).forEach(audio => {
 
 let audioUnlocked = false;
 
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsOverlay = document.getElementById('settingsOverlay');
+const closeSettings = document.getElementById('closeSettings');
+
+const musicVolume = document.getElementById('musicVolume');
+const soundVolume = document.getElementById('soundVolume');
+
+let pausedBySettings = false;
+let savedMusicState = false;
+let savedCycleState = false;
+let cyclePaused = false;
+
+let musicVol =
+    Number(localStorage.getItem('musicVolume') || 45);
+
+let soundVol =
+    Number(localStorage.getItem('soundVolume') || 100);
+
+musicVolume.value = musicVol;
+soundVolume.value = soundVol;
+
+music.volume = musicVol / 100;
 
 /*
     Браузеры иногда запрещают звук,
@@ -186,7 +208,7 @@ function playSound(name, volume = 1) {
     try {
         audio.pause();
         audio.currentTime = 0;
-        audio.volume = volume;
+        audio.volume = (soundEnabled ? volume : 0) * (soundVol / 100)
 
         const promise = audio.play();
 
@@ -539,7 +561,7 @@ function startAvatarCycle() {
 
     cycleInterval = setInterval(() => {
 
-        if (hovered) return;
+        if (hovered || cyclePaused) return;;
 
         cycleIndex =
             (cycleIndex + 1) % cycleColors.length;
@@ -806,7 +828,7 @@ function bouncePooFromRect(
         Math.min(
             fromTop,
             fromBottom
-        );
+        );Btn
 
 
     if (
@@ -2069,3 +2091,75 @@ particleFrame();
 
 // poo
 pooLoop();
+
+/* =========================================================
+   SETTINGS PAUSE
+========================================================= */
+
+function pauseSite(){
+
+    pausedBySettings = true;
+
+    savedMusicState =
+        musicEnabled && !music.paused;
+
+    if (savedMusicState) {
+        music.pause();
+    }
+
+    Object.values(sounds).forEach(a => a.pause());
+
+    cyclePaused = true;
+}
+
+function resumeSite(){
+
+    pausedBySettings = false;
+
+    cyclePaused = false;
+
+    if (savedMusicState) {
+        music.play().catch(()=>{});
+    }
+}
+
+settingsBtn.addEventListener('click', () => {
+    pauseSite();
+    settingsOverlay.classList.remove('hidden');
+});
+
+closeSettings.addEventListener('click', () => {
+    settingsOverlay.classList.add('hidden');
+    resumeSite();
+});
+
+settingsOverlay.addEventListener('click', e => {
+    if (e.target === settingsOverlay) {
+        settingsOverlay.classList.add('hidden');
+        resumeSite();
+    }
+});
+
+/* volumes */
+
+musicVolume.addEventListener('input', () => {
+
+    musicVol = Number(musicVolume.value);
+
+    music.volume = musicVol / 100;
+
+    localStorage.setItem(
+        'musicVolume',
+        musicVol
+    );
+});
+
+soundVolume.addEventListener('input', () => {
+
+    soundVol = Number(soundVolume.value);
+
+    localStorage.setItem(
+        'soundVolume',
+        soundVol
+    );
+});
