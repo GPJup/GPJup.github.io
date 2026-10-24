@@ -220,7 +220,7 @@ main{
     width:min(430px,calc(100% - 28px));
     grid-template-columns:1fr;
     gap:18px;
-    padding:72px 0 32px; /* место под кнопки */
+    padding:28px 0 24px;
   }
 
   .profile{
@@ -253,10 +253,6 @@ main{
   .card span{
     font-size:16px;
   }
-
-  
-
-  
 
   #poo{
     width:58px;
