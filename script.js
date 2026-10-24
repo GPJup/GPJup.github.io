@@ -26,6 +26,7 @@ const palette = [
 ];
 
 let particles = [];
+let cyclePaused = false;
 
 
 /* =========================================================
