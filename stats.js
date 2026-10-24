@@ -67,7 +67,7 @@
       const key = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
       days.push({key, date, value:counts[key] || 0});
     }
-    const width = 660, height = 205, left = 34, right = 14, top = 18, bottom = 34;
+    const width = 660, height = 205, left = 34, right = 14, top = 40, bottom = 34;
     const plotWidth = width - left - right, plotHeight = height - top - bottom;
     const maxValue = Math.max(1, ...days.map(day => day.value));
     const yMax = maxValue <= 4 ? maxValue : Math.ceil(maxValue / 4) * 4;
@@ -102,8 +102,13 @@
         add("text", {x:x(i), y:height-12, "text-anchor":"middle", class:"axis-label"},
           svg, day.date.toLocaleDateString("ru-RU", {day:"2-digit", month:"2-digit"}));
       }
-      const point = add("circle", {cx:x(i), cy:y(day.value), r:3.5, class:"chart-point", tabindex:"0", "aria-label":String(day.value)});
-      add("text", {x:x(i), y:Math.max(top + 10, y(day.value) - 12), "text-anchor":"middle", class:"chart-value"}, svg, String(day.value));
+      const pointY = y(day.value);
+      add("circle", {cx:x(i), cy:pointY, r:3.5, class:"chart-point", tabindex:"0", "aria-label":String(day.value)});
+      const tip = add("g", {class:"chart-tooltip", "aria-hidden":"true"});
+      const bubbleTop = pointY - 32;
+      add("rect", {x:x(i)-18, y:bubbleTop, width:36, height:22, rx:7, class:"chart-tooltip-box"}, tip);
+      add("path", {d:`M ${x(i)-5} ${bubbleTop+21} L ${x(i)} ${bubbleTop+27} L ${x(i)+5} ${bubbleTop+21} Z`, class:"chart-tooltip-tail"}, tip);
+      add("text", {x:x(i), y:bubbleTop+15, "text-anchor":"middle", class:"chart-tooltip-text"}, tip, String(day.value));
     });
     container.replaceChildren(svg);
   }
