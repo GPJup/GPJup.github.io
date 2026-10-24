@@ -42,67 +42,6 @@ const profile =
 
 
 /* =========================================================
-   AUDIO
-========================================================= */
-
-const sounds = {
-    spring: new Audio("assets/spring.mp3"),
-    scary: new Audio("assets/scary.mp3"),
-    fire: new Audio("assets/fire.mp3")
-};
-/* =========================================================
-   AUDIO EFFECTS
-========================================================= */
-
-let soundEnabled = true;
-let soundVol = 100;
-
-Object.values(sounds).forEach(audio => {
-    audio.preload = "auto";
-});
-
-let audioUnlocked = false;
-
-function unlockAudio() {
-    if (audioUnlocked) return;
-    audioUnlocked = true;
-
-    Object.values(sounds).forEach(audio => {
-        try {
-            audio.volume = 0;
-            audio.play()
-                .then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                    audio.volume = 1;
-                })
-                .catch(() => { audio.volume = 1; });
-        } catch (error) {
-            audio.volume = 1;
-        }
-    });
-}
-
-window.addEventListener("pointerdown", unlockAudio, { once: false, passive: true });
-window.addEventListener("touchstart", unlockAudio, { once: false, passive: true });
-
-function playSound(name, volume = 1) {
-    if (!soundEnabled) return;
-    const audio = sounds[name];
-    if (!audio) return;
-
-    try {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.volume = volume * (soundVol / 100);
-        const promise = audio.play();
-        if (promise) promise.catch(() => {});
-    } catch (error) {
-        console.warn("Не удалось проиграть звук:", name);
-    }
-}
-
-/* =========================================================
    PARTICLES
 ========================================================= */
 
@@ -1243,10 +1182,6 @@ function burnElement(
 
 function startBurning() {
 
-    playSound(
-        "fire",
-        1
-    );
 
 
     /*
@@ -1349,10 +1284,6 @@ function startMainEvent(
         Пружина.
     */
 
-    playSound(
-        "spring",
-        1
-    );
 
 
     const animation =
@@ -1416,10 +1347,6 @@ function startMainEvent(
     animation.onfinish =
         () => {
 
-            playSound(
-                "spring",
-                0.8
-            );
 
 
             const spring =
@@ -1467,10 +1394,6 @@ function startMainEvent(
                         Крики.
                     */
 
-                    playSound(
-                        "scary",
-                        1
-                    );
 
 
                     /*
@@ -1816,7 +1739,6 @@ function dropPoo(
 
 function startBurning() {
 
-    playSound('fire', 1);
 
     const elements = [
         profile,
