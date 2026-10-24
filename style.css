@@ -316,19 +316,29 @@ main{
 }
 
 
-/* Number appears beside the hovered chart point, not at the cursor */
-.daily-chart .chart-value{
+/* Compact value bubble anchored above the hovered chart point */
+.daily-chart .chart-tooltip{
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .14s ease;
+}
+.daily-chart .chart-point:hover + .chart-tooltip,
+.daily-chart .chart-point:focus + .chart-tooltip{opacity:1}
+.daily-chart .chart-tooltip-box{
+  fill:#211d31;
+  stroke:#a78bfa;
+  stroke-width:1;
+}
+.daily-chart .chart-tooltip-tail{
+  fill:#211d31;
+  stroke:#a78bfa;
+  stroke-width:1;
+  stroke-linejoin:round;
+}
+.daily-chart .chart-tooltip-text{
   fill:#f5f3ff;
   font-size:12px;
   font-weight:750;
-  opacity:0;
-  pointer-events:none;
-  paint-order:stroke;
-  stroke:#11101a;
-  stroke-width:3px;
-  stroke-linejoin:round;
-  transition:opacity .14s ease;
+  font-variant-numeric:tabular-nums;
 }
-.daily-chart .chart-point:hover + .chart-value,
-.daily-chart .chart-point:focus + .chart-value{opacity:1}
-@media(prefers-reduced-motion:reduce){.daily-chart .chart-value{transition:none}}
+@media(prefers-reduced-motion:reduce){.daily-chart .chart-tooltip{transition:none}}
