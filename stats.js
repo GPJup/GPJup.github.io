@@ -52,6 +52,62 @@
     password.value = ""; password.focus();
   });
 
+  function renderDailyChart(rows) {
+    const container = $("dailyChart");
+    if (!container) return;
+    const counts = Object.fromEntries(rows
+      .filter(row => typeof row.counter_key === "string" && row.counter_key.startsWith("daily_views_"))
+      .map(row => [row.counter_key.slice("daily_views_".length), Number(row.value) || 0]));
+    const days = [];
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+    for (let offset = 13; offset >= 0; offset--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - offset);
+      const key = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+      days.push({key, date, value:counts[key] || 0});
+    }
+    const width = 660, height = 205, left = 34, right = 14, top = 18, bottom = 34;
+    const plotWidth = width - left - right, plotHeight = height - top - bottom;
+    const maxValue = Math.max(1, ...days.map(day => day.value));
+    const yMax = maxValue <= 4 ? maxValue : Math.ceil(maxValue / 4) * 4;
+    const x = i => left + (plotWidth * i / (days.length - 1));
+    const y = value => top + plotHeight - (value / yMax) * plotHeight;
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Открытия сайта за последние 14 дней");
+    const add = (tag, attrs, parent = svg, value = "") => {
+      const node = document.createElementNS(ns, tag);
+      Object.entries(attrs || {}).forEach(([key, val]) => node.setAttribute(key, String(val)));
+      if (value) node.textContent = value;
+      parent.appendChild(node);
+      return node;
+    };
+    const defs = add("defs", {});
+    const gradient = add("linearGradient", {id:"dailyChartFill", x1:"0", y1:"0", x2:"0", y2:"1"}, defs);
+    add("stop", {offset:"0%", "stop-color":"#a78bfa", "stop-opacity":".28"}, gradient);
+    add("stop", {offset:"100%", "stop-color":"#a78bfa", "stop-opacity":"0"}, gradient);
+    [0, Math.ceil(yMax / 2), yMax].filter((v,i,a)=>a.indexOf(v)===i).forEach(value => {
+      add("line", {x1:left, y1:y(value), x2:width-right, y2:y(value), class:"grid-line"});
+      add("text", {x:left-9, y:y(value)+3, "text-anchor":"end", class:"axis-label"}, svg, String(value));
+    });
+    const points = days.map((day,i)=>`${x(i)},${y(day.value)}`).join(" ");
+    const area = `${left},${top+plotHeight} ${points} ${width-right},${top+plotHeight}`;
+    add("polygon", {points:area, class:"chart-area"});
+    add("polyline", {points, class:"chart-line"});
+    days.forEach((day,i) => {
+      if (i % 2 === 0 || i === days.length - 1) {
+        add("text", {x:x(i), y:height-12, "text-anchor":"middle", class:"axis-label"},
+          svg, day.date.toLocaleDateString("ru-RU", {day:"2-digit", month:"2-digit"}));
+      }
+      const point = add("circle", {cx:x(i), cy:y(day.value), r:3.5, class:"chart-point", tabindex:"0"});
+      add("title", {}, point, `${day.date.toLocaleDateString("ru-RU")}: ${day.value} ${day.value === 1 ? "открытие" : "открытий"}`);
+    });
+    container.replaceChildren(svg);
+  }
+
   async function loadStats() {
     const status = $("status");
     const refresh = $("refreshBtn");
@@ -73,6 +129,7 @@
       const sum = keys => keys.reduce((total,key)=>total+(counts[key]||0),0);
       $("viewsTotal").textContent=(counts.page_views||0).toLocaleString("ru-RU");
       $("linksTotal").textContent=sum(labels.slice(0,5).map(x=>x[0])).toLocaleString("ru-RU");
+      renderDailyChart(rows);
       const max=Math.max(1,...labels.map(x=>counts[x[0]]||0));
       $("buttonStats").innerHTML=labels.map(([key,label])=>{
         const value=counts[key]||0, width=Math.min(100,value/max*100);
