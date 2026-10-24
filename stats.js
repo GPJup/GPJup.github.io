@@ -1,8 +1,8 @@
 (() => {
   "use strict";
   const PASSWORD = "2525";
-  const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_PUBLIC_KEY";
+  const SUPABASE_URL = "https://iwgfzfpfdprzkqbhlrec.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_BFhnNjPLWLj9k_p3HHcnQw_NBjHJU-o";
   const labels = [
     ["click_steam","Steam"],["click_spotify","Spotify"],["click_discord","Discord"],
     ["click_tiktok","TikTok"],["click_telegram","Telegram"],["click_music","Музыка"],
@@ -65,7 +65,7 @@
     status.textContent = "Загружаю данные…";
     try {
       const response = await fetch(SUPABASE_URL + "/rest/v1/site_stats?select=counter_key,value", {
-        headers: {"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer " + SUPABASE_ANON_KEY},
+        headers: {"apikey":SUPABASE_ANON_KEY},
         cache:"no-store"
       });
       if (!response.ok) throw new Error("HTTP " + response.status);
