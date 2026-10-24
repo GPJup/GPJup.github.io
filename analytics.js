@@ -4,7 +4,7 @@
   const SUPABASE_URL = "https://iwgfzfpfdprzkqbhlrec.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_BFhnNjPLWLj9k_p3HHcnQw_NBjHJU-o";
   console.info("[GPJup Analytics] script loaded", location.pathname);
-  const allowed = new Set(["page_views","click_steam","click_spotify","click_discord","click_tiktok","click_telegram","click_music","click_next","click_sound","click_settings"]);
+  const allowed = new Set(["page_views","click_steam","click_spotify","click_discord","click_tiktok","click_telegram"]);
   async function increment(key) {
     if (!allowed.has(key)) return;
     if (SUPABASE_URL.startsWith("YOUR_") || SUPABASE_ANON_KEY.startsWith("YOUR_")) {
@@ -28,7 +28,6 @@
     if (now - previous > 4000) { sessionStorage.setItem("gpjup_view_counted_at",String(now)); increment("page_views"); }
   } catch(_) { increment("page_views"); }
   const social = new Set(["steam","spotify","discord","tiktok","telegram"]);
-  const controls = {musicBtn:"click_music",skipBtn:"click_next",soundBtn:"click_sound",settingsBtn:"click_settings"};
   document.addEventListener("click",event => {
     const target = event.target instanceof Element ? event.target : event.target?.parentElement;
     if (!target) return;
@@ -38,7 +37,5 @@
       if (social.has(name)) increment("click_" + name);
       return;
     }
-    const button = target.closest("button[id]");
-    if (button && controls[button.id]) increment(controls[button.id]);
   },true);
 })();
