@@ -5,8 +5,7 @@
   const SUPABASE_ANON_KEY = "sb_publishable_BFhnNjPLWLj9k_p3HHcnQw_NBjHJU-o";
   const labels = [
     ["click_steam","Steam"],["click_spotify","Spotify"],["click_discord","Discord"],
-    ["click_tiktok","TikTok"],["click_telegram","Telegram"],["click_music","Музыка"],
-    ["click_next","Следующий трек"],["click_sound","Звук"],["click_settings","Настройки"]
+    ["click_tiktok","TikTok"],["click_telegram","Telegram"]
   ];
   const $ = id => document.getElementById(id);
   const modal = $("statsModal");
@@ -74,7 +73,6 @@
       const sum = keys => keys.reduce((total,key)=>total+(counts[key]||0),0);
       $("viewsTotal").textContent=(counts.page_views||0).toLocaleString("ru-RU");
       $("linksTotal").textContent=sum(labels.slice(0,5).map(x=>x[0])).toLocaleString("ru-RU");
-      $("controlsTotal").textContent=sum(labels.slice(5).map(x=>x[0])).toLocaleString("ru-RU");
       const max=Math.max(1,...labels.map(x=>counts[x[0]]||0));
       $("buttonStats").innerHTML=labels.map(([key,label])=>{
         const value=counts[key]||0, width=Math.min(100,value/max*100);
