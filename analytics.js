@@ -13,7 +13,7 @@
     try {
       const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/increment_site_counter", {
         method:"POST", headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},
-        body:JSON.stringify({counter_key:key}), keepalive:true
+        body:JSON.stringify({p_counter_key:key}), keepalive:true
       });
       if (!response.ok) {
         const detail = await response.text().catch(() => "");
