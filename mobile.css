@@ -143,26 +143,6 @@ main{
   left:-120px;
   top:50%;
   transform:translateY(-50%);
-  background:radial-gradient(
-    circle,
-    color-mix(in srgb,var(--link-color) 30%,transparent) 0%,
-    color-mix(in srgb,var(--link-color) 16%,transparent) 36%,
-    transparent 74%
-  );
-  opacity:.25;
-  transition:
-    left .9s ease,
-    opacity .5s ease;
-}
-
-.card::before{
-  content:'';
-  position:absolute;
-  width:240px;
-  height:240px;
-  left:-120px;
-  top:50%;
-  transform:translateY(-50%);
 
   background:radial-gradient(
     circle,
