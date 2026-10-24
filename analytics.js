@@ -32,6 +32,10 @@
     if (now - previous > 4000) {
       sessionStorage.setItem("gpjup_view_counted_at",String(now));
       increment("page_views");
+    }
+    const todayKey = "gpjup_daily_counted_" + localDateKey(new Date());
+    if (!sessionStorage.getItem(todayKey)) {
+      sessionStorage.setItem(todayKey, "1");
       increment("daily_views_" + localDateKey(new Date()));
     }
   } catch(_) {
