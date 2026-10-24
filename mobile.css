@@ -224,3 +224,13 @@ main{gap:12px;padding:14px 0 12px}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
 }
+
+
+/* Daily visit totals in the mobile analytics panel */
+.mobile-daily-analytics{margin:20px 0 8px}
+.mobile-daily-analytics h3{margin:0 0 10px}
+.mobile-daily-stats{display:grid;gap:8px}
+.daily-stat-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid #ffffff12;border-radius:12px;background:linear-gradient(110deg,#ffffff08,#ffffff03);font-size:13px}
+.daily-stat-row span{color:#c8c5d6}
+.daily-stat-row strong{color:#ddd6fe;font-size:17px;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.daily-stat-row{transition:none}}
