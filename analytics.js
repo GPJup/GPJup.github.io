@@ -5,8 +5,8 @@
   const SUPABASE_ANON_KEY = "sb_publishable_BFhnNjPLWLj9k_p3HHcnQw_NBjHJU-o";
   console.info("[GPJup Analytics] script loaded", location.pathname);
   const allowed = new Set(["page_views","click_steam","click_spotify","click_discord","click_tiktok","click_telegram"]);
-  async function increment(key) {
-    if (!allowed.has(key)) return;
+  function localDateKey(date) {\n    const pad = value => String(value).padStart(2, "0");\n    return date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate());\n  }\n  async function increment(key) {
+    if (!allowed.has(key) && !/^daily_views_\\d{4}-\\d{2}-\\d{2}$/.test(key)) return;
     if (SUPABASE_URL.startsWith("YOUR_") || SUPABASE_ANON_KEY.startsWith("YOUR_")) {
       console.warn("[GPJup Analytics] Configure Supabase URL and anon key in analytics.js."); return;
     }
@@ -25,8 +25,15 @@
   }
   try {
     const now = Date.now(), previous = Number(sessionStorage.getItem("gpjup_view_counted_at") || 0);
-    if (now - previous > 4000) { sessionStorage.setItem("gpjup_view_counted_at",String(now)); increment("page_views"); }
-  } catch(_) { increment("page_views"); }
+    if (now - previous > 4000) {
+      sessionStorage.setItem("gpjup_view_counted_at",String(now));
+      increment("page_views");
+      increment("daily_views_" + localDateKey(new Date()));
+    }
+  } catch(_) {
+    increment("page_views");
+    increment("daily_views_" + localDateKey(new Date()));
+  }
   const social = new Set(["steam","spotify","discord","tiktok","telegram"]);
   document.addEventListener("click",event => {
     const target = event.target instanceof Element ? event.target : event.target?.parentElement;
