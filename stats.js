@@ -102,8 +102,8 @@
         add("text", {x:x(i), y:height-12, "text-anchor":"middle", class:"axis-label"},
           svg, day.date.toLocaleDateString("ru-RU", {day:"2-digit", month:"2-digit"}));
       }
-      const point = add("circle", {cx:x(i), cy:y(day.value), r:3.5, class:"chart-point", tabindex:"0"});
-      add("title", {}, point, String(day.value));
+      const point = add("circle", {cx:x(i), cy:y(day.value), r:3.5, class:"chart-point", tabindex:"0", "aria-label":String(day.value)});
+      add("text", {x:x(i), y:Math.max(top + 10, y(day.value) - 12), "text-anchor":"middle", class:"chart-value"}, svg, String(day.value));
     });
     container.replaceChildren(svg);
   }
