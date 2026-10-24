@@ -103,7 +103,7 @@
           svg, day.date.toLocaleDateString("ru-RU", {day:"2-digit", month:"2-digit"}));
       }
       const point = add("circle", {cx:x(i), cy:y(day.value), r:3.5, class:"chart-point", tabindex:"0"});
-      add("title", {}, point, `${day.date.toLocaleDateString("ru-RU")}: ${day.value} ${day.value === 1 ? "открытие" : "открытий"}`);
+      add("title", {}, point, String(day.value));
     });
     container.replaceChildren(svg);
   }
