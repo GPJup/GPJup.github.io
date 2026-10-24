@@ -307,7 +307,7 @@ main{
 .daily-chart .axis-label{fill:#9290a6;font-size:10px}
 .daily-chart .chart-line{fill:none;stroke:#a78bfa;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 .daily-chart .chart-area{fill:url(#dailyChartFill)}
-.daily-chart .chart-point{fill:#171522;stroke:#c4b5fd;stroke-width:2;cursor:help}
+.daily-chart .chart-point{fill:#171522;stroke:#c4b5fd;stroke-width:2;cursor:default}
 .daily-chart .chart-point:hover{fill:#c4b5fd}
 @media(max-width:560px){
   .stats-summary{grid-template-columns:1fr}
