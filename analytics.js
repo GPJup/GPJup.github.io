@@ -3,6 +3,7 @@
   "use strict";
   const SUPABASE_URL = "https://iwgfzfpfdprzkqbhlrec.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_BFhnNjPLWLj9k_p3HHcnQw_NBjHJU-o";
+  console.info("[GPJup Analytics] script loaded", location.pathname);
   const allowed = new Set(["page_views","click_steam","click_spotify","click_discord","click_tiktok","click_telegram","click_music","click_next","click_sound","click_settings"]);
   async function increment(key) {
     if (!allowed.has(key)) return;
@@ -14,7 +15,12 @@
         method:"POST", headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},
         body:JSON.stringify({counter_key:key}), keepalive:true
       });
-      if (!response.ok) console.warn("[GPJup Analytics] Counter request failed:",response.status);
+      if (!response.ok) {
+        const detail = await response.text().catch(() => "");
+        console.error("[GPJup Analytics] Counter request failed:", response.status, detail);
+      } else {
+        console.info("[GPJup Analytics] Counter updated:", key);
+      }
     } catch(error) { console.warn("[GPJup Analytics] Could not send counter:",error); }
   }
   try {
