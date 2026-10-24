@@ -1,8 +1,8 @@
 /* GPJup Analytics: shared lifetime counters for desktop and mobile. */
 (() => {
   "use strict";
-  const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-  const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_PUBLIC_KEY";
+  const SUPABASE_URL = "https://iwgfzfpfdprzkqbhlrec.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_BFhnNjPLWLj9k_p3HHcnQw_NBjHJU-o";
   const allowed = new Set(["page_views","click_steam","click_spotify","click_discord","click_tiktok","click_telegram","click_music","click_next","click_sound","click_settings"]);
   async function increment(key) {
     if (!allowed.has(key)) return;
@@ -11,7 +11,7 @@
     }
     try {
       const response = await fetch(SUPABASE_URL + "/rest/v1/rpc/increment_site_counter", {
-        method:"POST", headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer " + SUPABASE_ANON_KEY},
+        method:"POST", headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},
         body:JSON.stringify({counter_key:key}), keepalive:true
       });
       if (!response.ok) console.warn("[GPJup Analytics] Counter request failed:",response.status);
