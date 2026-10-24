@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>GPJup Analytics</title>
+  <link rel="stylesheet" href="stats.css">
+</head>
+<body>
+  <main class="shell">
+    <section id="loginPanel" class="panel login">
+      <div class="eyebrow">GPJUP / PRIVATE AREA</div>
+      <h1>Статистика сайта</h1>
+      <p class="muted">Введите пароль, чтобы открыть панель.</p>
+      <form id="loginForm">
+        <label for="password">Пароль</label>
+        <input id="password" type="password" inputmode="numeric" autocomplete="current-password" maxlength="32" required>
+        <button type="submit">Войти</button>
+        <p id="loginError" class="error" role="alert"></p>
+      </form>
+      <p class="warning">Важно: пароль 2525 проверяется в браузере и не является настоящей защитой. Его можно найти в исходном коде. Не храните здесь секретные данные.</p>
+    </section>
+
+    <section id="dashboard" hidden>
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">GPJUP / ANALYTICS</div>
+          <h1>Общая статистика</h1>
+          <p class="muted">За всё время · все устройства вместе</p>
+        </div>
+        <button id="logoutBtn" class="secondary" type="button">Выйти</button>
+      </header>
+      <p id="status" class="status" role="status">Загрузка статистики…</p>
+      <div class="summary">
+        <article class="metric">
+          <span class="metric-label">Открытия сайта</span>
+          <strong id="viewsTotal">—</strong>
+          <span class="metric-note">Открытия с ПК и телефона</span>
+        </article>
+        <article class="metric">
+          <span class="metric-label">Клики по ссылкам</span>
+          <strong id="linksTotal">—</strong>
+          <span class="metric-note">Steam, Spotify, Discord, TikTok, Telegram</span>
+        </article>
+        <article class="metric">
+          <span class="metric-label">Клики по управлению</span>
+          <strong id="controlsTotal">—</strong>
+          <span class="metric-note">Музыка, следующий трек, звук, настройки</span>
+        </article>
+      </div>
+      <section class="panel">
+        <div class="section-heading">
+          <div><h2>Клики по кнопкам</h2><p class="muted">Нажатия за всё время</p></div>
+          <button id="refreshBtn" class="secondary" type="button">Обновить</button>
+        </div>
+        <div id="buttonStats" class="button-stats"></div>
+      </section>
+      <p class="footer-note">Статистика общая для всех устройств и хранится в Supabase.</p>
+    </section>
+  </main>
+  <script src="stats.js"></script>
+</body>
+</html>
