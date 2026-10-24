@@ -314,3 +314,21 @@ main{
   .daily-analytics{padding:14px 10px 8px}
   .daily-chart-heading{align-items:flex-start}
 }
+
+
+/* Number appears beside the hovered chart point, not at the cursor */
+.daily-chart .chart-value{
+  fill:#f5f3ff;
+  font-size:12px;
+  font-weight:750;
+  opacity:0;
+  pointer-events:none;
+  paint-order:stroke;
+  stroke:#11101a;
+  stroke-width:3px;
+  stroke-linejoin:round;
+  transition:opacity .14s ease;
+}
+.daily-chart .chart-point:hover + .chart-value,
+.daily-chart .chart-point:focus + .chart-value{opacity:1}
+@media(prefers-reduced-motion:reduce){.daily-chart .chart-value{transition:none}}
