@@ -175,6 +175,37 @@
 
   </div>
 
+  
+  <button id="statsTrigger" class="stats-trigger" type="button" aria-haspopup="dialog" aria-controls="statsModal">Статистика</button>
+  <div id="statsModal" class="stats-modal" hidden>
+    <div class="stats-backdrop" data-stats-close></div>
+    <section class="stats-dialog" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+      <button class="stats-close" type="button" aria-label="Закрыть" data-stats-close>×</button>
+      <section id="loginPanel" class="stats-login">
+        <div class="stats-eyebrow">GPJUP / PRIVATE AREA</div>
+        <h2 id="statsTitle">Статистика сайта</h2>
+        <p class="stats-muted">Введите пароль для просмотра.</p>
+        <form id="loginForm">
+          <label for="password">Пароль</label>
+          <input id="password" type="password" inputmode="numeric" autocomplete="current-password" maxlength="32" required>
+          <button type="submit" class="stats-submit">Открыть</button>
+          <p id="loginError" class="stats-error" role="alert"></p>
+        </form>
+      </section>
+      <section id="dashboard" hidden>
+        <div class="stats-heading"><div><div class="stats-eyebrow">GPJUP / ANALYTICS</div><h2>Общая статистика</h2><p class="stats-muted">За всё время · все устройства вместе</p></div><button id="refreshBtn" class="stats-secondary" type="button">Обновить</button></div>
+        <p id="status" class="stats-status" role="status">Загрузка статистики…</p>
+        <div class="stats-summary">
+          <article class="stats-metric"><span>Открытия сайта</span><strong id="viewsTotal">—</strong></article>
+          <article class="stats-metric"><span>Клики по ссылкам</span><strong id="linksTotal">—</strong></article>
+          <article class="stats-metric"><span>Клики по управлению</span><strong id="controlsTotal">—</strong></article>
+        </div>
+        <h3>Клики по кнопкам</h3>
+        <div id="buttonStats" class="stats-button-list"></div>
+      </section>
+    </section>
+  </div>
+
   <script src="analytics.js"></script>
   <script src="script.js"></script>
 </body>
