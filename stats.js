@@ -108,6 +108,32 @@
     container.replaceChildren(svg);
   }
 
+
+  function renderMobileDailyStats(rows) {
+    const container = $("mobileDailyStats");
+    if (!container) return;
+    const counts = Object.fromEntries(rows
+      .filter(row => typeof row.counter_key === "string" && row.counter_key.startsWith("daily_views_"))
+      .map(row => [row.counter_key.slice("daily_views_".length), Number(row.value) || 0]));
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+    const dateKey = date => date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+    const totalFor = period => {
+      let total = 0;
+      for (let offset = 0; offset < period; offset++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - offset);
+        total += counts[dateKey(date)] || 0;
+      }
+      return total;
+    };
+    const periods = [["Сегодня", 1], ["Последние 3 дня", 3], ["Последние 7 дней", 7], ["Последние 14 дней", 14]];
+    container.innerHTML = periods.map(([label, period]) =>
+      '<div class="daily-stat-row"><span>' + label + '</span><strong>' +
+      totalFor(period).toLocaleString("ru-RU") + '</strong></div>'
+    ).join("");
+  }
+
   async function loadStats() {
     const status = $("status");
     const refresh = $("refreshBtn");
@@ -130,6 +156,7 @@
       $("viewsTotal").textContent=(counts.page_views||0).toLocaleString("ru-RU");
       $("linksTotal").textContent=sum(labels.slice(0,5).map(x=>x[0])).toLocaleString("ru-RU");
       renderDailyChart(rows);
+      renderMobileDailyStats(rows);
       const max=Math.max(1,...labels.map(x=>counts[x[0]]||0));
       $("buttonStats").innerHTML=labels.map(([key,label])=>{
         const value=counts[key]||0, width=Math.min(100,value/max*100);
