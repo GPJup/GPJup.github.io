@@ -50,89 +50,20 @@ const sounds = {
     fire: new Audio("assets/fire.mp3")
 };
 /* =========================================================
-   MUSIC PLAYER
+   AUDIO EFFECTS
 ========================================================= */
 
-const musicTracks = [ 
-   'music/1.mp3', 
-   'music/2.mp3', 
-   'music/3.mp3', 
-   'music/4.mp3' 
-];
+let soundEnabled = true;
+let soundVol = 100;
 
-let musicEnabled = false;
-let soundEnabled = false;
-
-const music = new Audio();
-music.preload = 'auto';
-music.volume = 0.45;
-
-let currentTrack = -1;
-
-function playRandomTrack() {
-  if (!musicEnabled || musicTracks.length === 0) return;
-
-  let next;
-
-  do {
-    next = Math.floor(Math.random() * musicTracks.length);
-  } while (musicTracks.length > 1 && next === currentTrack);
-
-  currentTrack = next;
-  music.src = musicTracks[next];
-  music.play().catch(()=>{});
-}
-
-music.addEventListener('ended', playRandomTrack);
-
-const musicBtn = document.getElementById('musicBtn');
-const soundBtn = document.getElementById('soundBtn');
-const skipBtn = document.getElementById('skipBtn');
-
-musicBtn.addEventListener('click', () => {
-  unlockAudio();
-
-  musicEnabled = !musicEnabled;
-  musicBtn.classList.toggle('active', musicEnabled);
-
-  if (musicEnabled) {
-    playRandomTrack();
-  } else {
-    music.pause();
-  }
-});
-
-soundBtn.addEventListener('click', () => {
-  unlockAudio();
-
-  soundEnabled = !soundEnabled;
-  soundBtn.classList.toggle('active', soundEnabled);
-});
-
-skipBtn.addEventListener('click', () => {
-  if (!musicEnabled) return;
-  playRandomTrack();
-});
 Object.values(sounds).forEach(audio => {
     audio.preload = "auto";
 });
 
 let audioUnlocked = false;
 
-const musicVolume = document.getElementById('musicVolume');
-const soundVolume = document.getElementById('soundVolume');
-
-/*
-    Браузеры иногда запрещают звук,
-    пока пользователь хотя бы один раз
-    не взаимодействовал со страницей.
-*/
-
 function unlockAudio() {
-    if (audioUnlocked) {
-        return;
-    }
-
+    if (audioUnlocked) return;
     audioUnlocked = true;
 
     Object.values(sounds).forEach(audio => {
@@ -144,71 +75,31 @@ function unlockAudio() {
                     audio.currentTime = 0;
                     audio.volume = 1;
                 })
-                .catch(() => {
-                    audio.volume = 1;
-                });
+                .catch(() => { audio.volume = 1; });
         } catch (error) {
             audio.volume = 1;
         }
     });
 }
 
-window.addEventListener(
-    "pointerdown",
-    unlockAudio,
-    {
-        once: false,
-        passive: true
-    }
-);
-
-window.addEventListener(
-    "touchstart",
-    unlockAudio,
-    {
-        once: false,
-        passive: true
-    }
-);
-
-
-/*
-    Проигрывание звука.
-*/
+window.addEventListener("pointerdown", unlockAudio, { once: false, passive: true });
+window.addEventListener("touchstart", unlockAudio, { once: false, passive: true });
 
 function playSound(name, volume = 1) {
-   if (!soundEnabled) return;
-    
-   const audio = sounds[name];
-
-    if (!audio) {
-        return;
-    }
+    if (!soundEnabled) return;
+    const audio = sounds[name];
+    if (!audio) return;
 
     try {
         audio.pause();
         audio.currentTime = 0;
-        audio.volume = (soundEnabled ? volume : 0) * (soundVol / 100)
-
+        audio.volume = volume * (soundVol / 100);
         const promise = audio.play();
-
-        if (promise) {
-            promise.catch(() => {
-                /*
-                    Если браузер всё ещё блокирует
-                    звук, пробуем после следующего
-                    взаимодействия.
-                */
-            });
-        }
+        if (promise) promise.catch(() => {});
     } catch (error) {
-        console.warn(
-            "Не удалось проиграть звук:",
-            name
-        );
+        console.warn("Не удалось проиграть звук:", name);
     }
 }
-
 
 /* =========================================================
    PARTICLES
@@ -2022,100 +1913,3 @@ particleFrame();
 
 // poo
 pooLoop();
-
-/* =========================================================
-   SETTINGS PAUSE
-========================================================= */
-
-function pauseSite(){
-
-    pausedBySettings = true;
-
-    savedMusicState =
-        musicEnabled && !music.paused;
-
-    if (savedMusicState) {
-        music.pause();
-    }
-
-    Object.values(sounds).forEach(a => a.pause());
-
-    cyclePaused = true;
-}
-
-function resumeSite(){
-
-    pausedBySettings = false;
-
-    cyclePaused = false;
-
-    if (savedMusicState) {
-        music.play().catch(()=>{});
-    }
-}
-
-settingsBtn.addEventListener('click', () => {
-    pauseSite();
-    settingsOverlay.classList.remove('hidden');
-});
-
-closeSettings.addEventListener('click', () => {
-    settingsOverlay.classList.add('hidden');
-    resumeSite();
-});
-
-settingsOverlay.addEventListener('click', e => {
-    if (e.target === settingsOverlay) {
-        settingsOverlay.classList.add('hidden');
-        resumeSite();
-    }
-});
-
-/* volumes */
-
-musicVolume.addEventListener('input', () => {
-
-    musicVol = Number(musicVolume.value);
-
-    music.volume = musicVol / 100;
-
-    localStorage.setItem(
-        'musicVolume',
-        musicVol
-    );
-});
-
-soundVolume.addEventListener('input', () => {
-
-    soundVol = Number(soundVolume.value);
-
-    localStorage.setItem(
-        'soundVolume',
-        soundVol
-    );
-});
-
-/* =========================================================
-   SETTINGS PANEL
-========================================================= */
-
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsOverlay = document.getElementById('settingsOverlay');
-const closeSettings = document.getElementById('closeSettings');
-
-if (settingsBtn && settingsOverlay && closeSettings) {
-
-    settingsBtn.addEventListener('click', () => {
-        settingsOverlay.classList.remove('hidden');
-    });
-
-    closeSettings.addEventListener('click', () => {
-        settingsOverlay.classList.add('hidden');
-    });
-
-    settingsOverlay.addEventListener('click', e => {
-        if (e.target === settingsOverlay) {
-            settingsOverlay.classList.add('hidden');
-        }
-    });
-}
